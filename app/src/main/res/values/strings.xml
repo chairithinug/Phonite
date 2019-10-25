@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+
     <string name="hello">Hello World, Tuto4_BadprogTutorialPlayingSoundsActivity!</string>
-    <string name="app_name">Tuto 4 - PlayingSounds - BadproG.com</string>
     <string name="stringHello">Fire Lazor</string>
     <string name="stringGoodbye">Fire Lazor</string>
-
+    <string name="app_name">Phonite</string>
 </resources>

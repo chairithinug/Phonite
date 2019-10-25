@@ -1,33 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    >
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/idHello"
-        android:text="@string/stringHello"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        />
-
-    <Button
-        android:id="@+id/idGoodBye"
-        android:text="@string/stringGoodbye"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        />
-
-
-    <ToggleButton
-        android:id="@+id/onOffFlashlight"
+    <TextView
+        android:id="@+id/randTxt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textOn="Turn Off"
-        android:textOff="Turn On"
-        android:checked="false"
-        android:text="Turn On/Off Camera LED/ Flashlight Android" />
+        android:layout_marginTop="256dp"
+        android:text="HELLO"
+        android:textSize="28sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-</LinearLayout>
+    <Button
+        android:id="@+id/btnCamera"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Camera"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/randTxt" />
+
+    <Button
+        android:id="@+id/FIRE_DA_LAZOR"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="FIRE_DA_LAZOR"
+        tools:layout_editor_absoluteX="69dp"
+        tools:layout_editor_absoluteY="32dp" />
+    />
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
