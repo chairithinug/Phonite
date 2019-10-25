@@ -20,4 +20,14 @@
         android:layout_height="wrap_content"
         />
 
+
+    <ToggleButton
+        android:id="@+id/onOffFlashlight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textOn="Turn Off"
+        android:textOff="Turn On"
+        android:checked="false"
+        android:text="Turn On/Off Camera LED/ Flashlight Android" />
+
 </LinearLayout>

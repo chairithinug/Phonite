@@ -2,25 +2,27 @@ package com.example.phonite;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
 
 public class MainActivity extends AppCompatActivity {
 
     /**
      * Variables
      */
-    MediaPlayer mp        = null;
-    String hello         = "Hello!";
-    String goodbye        = "GoodBye!";
+    MediaPlayer mp = null;
+    String hello = "Hello!";
+    String goodbye = "GoodBye!";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+
 
         /**
          * Talking with the buttonHello
@@ -29,7 +31,8 @@ public class MainActivity extends AppCompatActivity {
         buttonHello.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                managerOfSound(hello);
+
+                managerOfSound(goodbye);
             } // END onClick()
         }); // END buttonHello
 
@@ -40,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
         buttonGoodBye.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                // camera.stopPreview();
                 managerOfSound(goodbye);
             } // END onClick()
         }); // END buttonGoodBye
@@ -54,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
             mp.reset();
             mp.release();
         }
+
         if (theText == hello)
             mp = MediaPlayer.create(this, R.raw.laser);
         else if (theText == goodbye)
