@@ -31,15 +31,16 @@ public class MainActivity extends AppCompatActivity {
     static final int REQUEST_IMAGE_CAPTURE = 1;
     public TextView randTxt;
     public Button btnCamera;
-
+    public Button btnSound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);/
 
-
-        randTxt = findViewById(R.id.randTxt);
+        randTxt = (TextView) findViewById(R.id.randTxt);
         btnCamera = findViewById(R.id.btnCamera);
+        btnSound = (Button) findViewById(R.id.btnSound);
         btnCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -50,23 +51,20 @@ public class MainActivity extends AppCompatActivity {
                     cameraManager.setTorchMode(cameraId, true);
                 } catch (CameraAccessException e) {
                 }
-            } // END onClick()
-        }); // END buttonHello
+//                //                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+////                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+////                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+////                }
+            }
+        });
 
-        /**
-         * Talking with the buttonGoodBye
-         */
-        final Button buttonGoodBye = (Button) findViewById(R.id.FIRE_DA_LAZOR);
-        buttonGoodBye.setOnClickListener(new View.OnClickListener() {
+        btnSound.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                // camera.stopPreview();
                 managerOfSound(goodbye);
-            } // END onClick()
-        }); // END buttonGoodBye
+            }
+        });
     }
-
 
     /**
      * Manager of Sounds
@@ -76,7 +74,6 @@ public class MainActivity extends AppCompatActivity {
             mp.reset();
             mp.release();
         }
-
         if (theText == hello)
             mp = MediaPlayer.create(this, R.raw.laser);
         else if (theText == goodbye)
@@ -84,12 +81,5 @@ public class MainActivity extends AppCompatActivity {
         else
             mp = MediaPlayer.create(this, R.raw.laser);
         mp.start();
-
-
-//                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-//                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-//                }
-
     }
 }
