@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);/
+        setContentView(R.layout.activity_main);
 
         randTxt = (TextView) findViewById(R.id.randTxt);
         btnCamera = findViewById(R.id.btnCamera);
