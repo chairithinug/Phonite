@@ -3,11 +3,13 @@
     package="com.example.phonite">
 
 
-<!-- Camera API-->
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-feature android:name="android.hardware.camera" />
+    <!-- Camera API-->
+<!--    <uses-permission android:name="android.permission.CAMERA" />-->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
 
-<!--    GPS Location for Camera-->
+    <!--    GPS Location for Camera-->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <!-- Needed only if your app targets Android 5.0 (API level 21) or higher. -->
     <uses-feature android:name="android.hardware.location.gps" />
