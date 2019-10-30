@@ -1,85 +1,53 @@
 package com.example.phonite;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
-import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.CameraAccessException;
-
-import android.media.MediaPlayer;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
+import android.view.MenuItem;
 
-import android.provider.MediaStore;
-import android.content.Intent;
-import android.content.Context;
+//import android.support.design.widget.BottomNavigationView;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    /**
-     * Variables
-     */
-    MediaPlayer mp = null;
-    String hello = "Hello!";
-    String goodbye = "GoodBye!";
-
-    public final String TAG = "Camera";
-    static final int REQUEST_IMAGE_CAPTURE = 1;
-    public TextView randTxt;
-    public Button btnCamera;
-    public Button btnSound;
+    final Fragment fragment1 = new FireFragment();
+    final Fragment fragment2 = new ReceiveFragment();
+    final FragmentManager fm = getSupportFragmentManager();
+    Fragment active = fragment1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        BottomNavigationView navView = findViewById(R.id.nav_view);
+        navView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        navView.getMenu().getItem(1).setChecked(true);
+        fm.beginTransaction().add(R.id.main_container, fragment1, "1").show(fragment1).commit();
+        fm.beginTransaction().add(R.id.main_container,fragment2, "2").hide(fragment2).commit();
 
-        randTxt = (TextView) findViewById(R.id.randTxt);
-        btnCamera = findViewById(R.id.btnCamera);
-        btnSound = (Button) findViewById(R.id.btnSound);
-        btnCamera.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "Camera click");
-                CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
-                try {
-                    String cameraId = cameraManager.getCameraIdList()[0];
-                    cameraManager.setTorchMode(cameraId, true);
-                } catch (CameraAccessException e) {
-                }
-//                //                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-////                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-////                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-////                }
-            }
-        });
-
-        btnSound.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                managerOfSound(goodbye);
-            }
-        });
     }
+    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+            = new BottomNavigationView.OnNavigationItemSelectedListener() {
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.navigation_fire:
+                    fm.beginTransaction().hide(active).show(fragment1).commit();
+                    active = fragment1;
+                    return true;
+                case R.id.navigation_receive:
+                    fm.beginTransaction().hide(active).show(fragment2).commit();
+                    active = fragment2;
+                    return true;
 
-    /**
-     * Manager of Sounds
-     */
-    protected void managerOfSound(String theText) {
-        if (mp != null) {
-            mp.reset();
-            mp.release();
+            }
+            return false;
         }
-        if (theText == hello)
-            mp = MediaPlayer.create(this, R.raw.laser);
-        else if (theText == goodbye)
-            mp = MediaPlayer.create(this, R.raw.laser);
-        else
-            mp = MediaPlayer.create(this, R.raw.laser);
-        mp.start();
-    }
+    };
+
 }
