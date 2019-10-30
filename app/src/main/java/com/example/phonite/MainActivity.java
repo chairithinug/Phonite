@@ -8,6 +8,7 @@ import android.hardware.camera2.CameraAccessException;
 import android.media.MediaPlayer;
 
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -32,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     public TextView randTxt;
     public Button btnCamera;
     public Button btnSound;
+    boolean flashToggle = true;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +51,13 @@ public class MainActivity extends AppCompatActivity {
                 CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
                 try {
                     String cameraId = cameraManager.getCameraIdList()[0];
+                    managerOfSound(goodbye);
+
                     cameraManager.setTorchMode(cameraId, true);
+                    SystemClock.sleep(500); //TODO might be bad
+                    cameraManager.setTorchMode(cameraId, false);
+
+
                 } catch (CameraAccessException e) {
                 }
 //                //                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
