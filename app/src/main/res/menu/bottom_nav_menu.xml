@@ -6,6 +6,6 @@
         android:icon="@drawable/ic_flash"/>
     <item
     android:id="@+id/navigation_receive"
-    android:title="Flash"
+    android:title="Receive"
     android:icon="@drawable/ic_receive"/>
 </menu>
