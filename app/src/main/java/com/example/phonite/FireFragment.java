@@ -34,57 +34,46 @@ public class FireFragment extends Fragment {
     public final String TAG = "Camera";
     public TextView modeText;
     public Button btnCamera;
-    Context context = getContext();
-
+    private Context context;
 
     public FireFragment() {
         // Required empty public constructor
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-      //  super.onCreate(savedInstanceState);
-      //  setContentView(R.layout.activity_main);
-
+        //  super.onCreate(savedInstanceState);
+        //  setContentView(R.layout.activity_main);
         View view = inflater.inflate(R.layout.fragment_fire, container, false);
         modeText = view.findViewById(R.id.modeText);
         btnCamera = view.findViewById(R.id.btnCamera);
+        context = getActivity().getApplicationContext();
+
         btnCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                btnCamera.setEnabled(false);
-
-
+//                btnCamera.setEnabled(false);
                 Log.d(TAG, "Camera click");
                 CameraManager cameraManager = (CameraManager) context.getSystemService(context.CAMERA_SERVICE);
-
                 try {
                     String cameraId = cameraManager.getCameraIdList()[0];
                     managerOfSound(goodbye);
                     cameraManager.setTorchMode(cameraId, true);
                     try {
-
                         Thread.sleep(500);
-
                     } catch (InterruptedException e) {
                         //System.out.println("got interrupted!");
                     }
                     cameraManager.setTorchMode(cameraId, false);
-
-
                 } catch (CameraAccessException e) {
                 }
-                btnCamera.setEnabled(true);
+//                btnCamera.setEnabled(true);
                 btnCamera.cancelPendingInputEvents();
             }
         });
-
-
-
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_fire, container, false);
+        return view;
     }
 
     /**

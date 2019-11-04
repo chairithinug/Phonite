@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         BottomNavigationView navView = findViewById(R.id.nav_view);
         navView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        navView.getMenu().getItem(1).setChecked(true);
+        navView.getMenu().getItem(0).setChecked(true);
         fm.beginTransaction().add(R.id.main_container, fragment1, "1").show(fragment1).commit();
         fm.beginTransaction().add(R.id.main_container,fragment2, "2").hide(fragment2).commit();
 
