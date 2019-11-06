@@ -1,11 +1,7 @@
 package com.example.phonite;
 
-import android.content.ContentResolver;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Rect;
 import android.media.Image;
-import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -19,11 +15,7 @@ import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
 import com.google.firebase.ml.vision.label.FirebaseVisionImageLabel;
 import com.google.firebase.ml.vision.label.FirebaseVisionImageLabeler;
-import com.google.firebase.ml.vision.objects.FirebaseVisionObject;
-import com.google.firebase.ml.vision.objects.FirebaseVisionObjectDetector;
-import com.google.firebase.ml.vision.objects.FirebaseVisionObjectDetectorOptions;
 
-import java.io.IOException;
 import java.util.List;
 
 public class ImageAnalyzer implements ImageAnalysis.Analyzer {

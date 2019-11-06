@@ -4,17 +4,8 @@ package com.example.phonite;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.Camera;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.TextureView;
@@ -24,8 +15,10 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import static android.content.ContentValues.TAG;
-import static android.content.Context.CAMERA_SERVICE;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 
 
 /**
@@ -118,7 +111,7 @@ public class FireFragment extends Fragment {
         });
         // Inflate the layout for this fragment
 
-        viewFinder = (TextureView) view.findViewById(R.id.view_finder);
+        viewFinder = view.findViewById(R.id.view_finder);
 
 
         if(allPermissionsGranted()){

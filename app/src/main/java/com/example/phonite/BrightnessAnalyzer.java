@@ -2,15 +2,13 @@ package com.example.phonite;
 
 import android.util.Log;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageProxy;
+
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class BrightnessAnalyzer implements ImageAnalysis.Analyzer {
 

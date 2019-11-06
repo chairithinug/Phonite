@@ -1,27 +1,20 @@
     package com.example.phonite;
 
-import android.Manifest;
-import android.content.Context;
-import android.graphics.SurfaceTexture;
-import android.util.Log;
-import android.util.Size;
-import android.view.TextureView;
-import android.view.View;
-import android.view.ViewGroup;
+    import android.content.Context;
+    import android.util.Log;
+    import android.util.Size;
+    import android.view.TextureView;
+    import android.view.ViewGroup;
 
-import java.lang.reflect.Array;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+    import androidx.camera.core.CameraX;
+    import androidx.camera.core.ImageAnalysis;
+    import androidx.camera.core.ImageAnalysisConfig;
+    import androidx.camera.core.Preview;
+    import androidx.camera.core.PreviewConfig;
+    import androidx.lifecycle.LifecycleOwner;
 
-import androidx.annotation.NonNull;
-import androidx.camera.core.CameraX;
-import androidx.camera.core.ImageAnalysis;
-import androidx.camera.core.ImageAnalysisConfig;
-import androidx.camera.core.ImageCapture;
-import androidx.camera.core.ImageCaptureConfig;
-import androidx.camera.core.Preview;
-import androidx.camera.core.PreviewConfig;
-import androidx.lifecycle.LifecycleOwner;
+    import java.util.concurrent.ExecutorService;
+    import java.util.concurrent.Executors;
 
 public class CameraStreamer implements Runnable{
 
@@ -36,7 +29,7 @@ public class CameraStreamer implements Runnable{
     // https://docs.microsoft.com/en-us/dotnet/api/android.hardware.camera2.cameramanager.opencamera?view=xamarin-android-sdk-9
     public CameraStreamer(Context context){
 
-        this.context = context;
+        CameraStreamer.context = context;
         cameraStarted = false;
 
 
