@@ -1,20 +1,28 @@
 package com.example.phonite;
 
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.graphics.Camera;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import static android.content.ContentValues.TAG;
 import static android.content.Context.CAMERA_SERVICE;
@@ -35,9 +43,42 @@ public class FireFragment extends Fragment {
     public TextView modeText;
     public Button btnCamera;
     private Context context;
+    public TextureView viewFinder;
+    private final String[] PERMISSIONS_NEEDED = {Manifest.permission.CAMERA};
+    private final String[] REQUIRED_PERMISSIONS = new String[]{"android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE"};
+    private int REQUEST_CODE_PERMISSIONS = 101;
+    TextureView textureView;
 
     public FireFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // 10 number comes from here https://codelabs.developers.google.com/codelabs/camerax-getting-started/#4
+        if (requestCode == 10) {
+            if (allPermissionsGranted()) {
+                CameraStreamer.startCamera(this, viewFinder);
+                Log.d("MATIN ACT","WE GET PERMISSIONS GRANTED");
+            } else {
+                Toast.makeText(getContext(),
+                        "Permissions not granted by the user.",
+                        Toast.LENGTH_SHORT).show();
+
+                Log.d("MATIN ACT","WE DIDNT GET PERMISSIONS GRANTED");
+                getActivity().finish();
+            }
+        }
+    }
+
+    private boolean allPermissionsGranted(){
+        for(String thisPermission : PERMISSIONS_NEEDED){
+            if(PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(getContext(), thisPermission)){
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -73,6 +114,17 @@ public class FireFragment extends Fragment {
             }
         });
         // Inflate the layout for this fragment
+
+        viewFinder = (TextureView) view.findViewById(R.id.view_finder);
+
+
+        if(allPermissionsGranted()){
+            Log.d(TAG, "STARTING CAMERA!!!!!!");
+
+            CameraStreamer.startCamera(getActivity(), viewFinder); //start camera if permission has been granted by user
+        } else{
+            ActivityCompat.requestPermissions( getActivity(), REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
+        }
         return view;
     }
 

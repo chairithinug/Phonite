@@ -25,7 +25,6 @@ public class MainActivity extends AppCompatActivity {
     final Fragment fragment2 = new ReceiveFragment();
     final FragmentManager fm = getSupportFragmentManager();
     Fragment active = fragment1;
-    private final String[] PERMISSIONS_NEEDED = {Manifest.permission.CAMERA};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,32 +57,5 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        // 10 number comes from here https://codelabs.developers.google.com/codelabs/camerax-getting-started/#4
-        if (requestCode == 10) {
-            if (allPermissionsGranted()) {
-                CameraStreamer.startCamera(this);
-                Log.d("MATIN ACT","WE GET PERMISSIONS GRANTED");
-            } else {
-                Toast.makeText(this,
-                        "Permissions not granted by the user.",
-                        Toast.LENGTH_SHORT).show();
-
-                Log.d("MATIN ACT","WE DIDNT GET PERMISSIONS GRANTED");
-                finish();
-            }
-        }
-    }
-
-    private boolean allPermissionsGranted(){
-        for(String thisPermission : PERMISSIONS_NEEDED){
-            if(PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(this, thisPermission)){
-                return false;
-            }
-        }
-        return true;
-    }
 
 }
