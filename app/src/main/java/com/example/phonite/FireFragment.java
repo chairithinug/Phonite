@@ -96,19 +96,22 @@ public class FireFragment extends Fragment {
             public void onClick(View v) {
 //                btnCamera.setEnabled(false);
                 Log.d(TAG, "Camera click");
-                CameraManager cameraManager = (CameraManager) context.getSystemService(context.CAMERA_SERVICE);
+                //CameraManager cameraManager = (CameraManager) context.getSystemService(context.CAMERA_SERVICE);
                 try {
-                    String cameraId = cameraManager.getCameraIdList()[0];
+                  //  String cameraId = cameraManager.getCameraIdList()[0];
                     managerOfSound(goodbye);
-                    cameraManager.setTorchMode(cameraId, true);
+                  //  cameraManager.setTorchMode(cameraId, true);
+                    CameraStreamer.startTorch();
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
                         //System.out.println("got interrupted!");
                     }
-                    cameraManager.setTorchMode(cameraId, false);
-                } catch (CameraAccessException e) {
-                }
+                    CameraStreamer.startTorch();
+                    //cameraManager.setTorchMode(cameraId, false);
+                } catch (Exception e) {
+                }/*
+                */
 //                btnCamera.setEnabled(true);
                 btnCamera.cancelPendingInputEvents();
             }

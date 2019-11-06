@@ -29,7 +29,7 @@ public class CameraStreamer implements Runnable{
     private Context context;
     private static ExecutorService executor = Executors.newSingleThreadExecutor();
     private static boolean cameraStarted;
-
+    public static Preview preview;
 
     // Have questions on how a camera works? look at this source:
     // https://medium.com/androiddevelopers/understanding-android-camera-capture-sessions-and-requests-4e54d9150295
@@ -42,6 +42,10 @@ public class CameraStreamer implements Runnable{
 
     }
 
+    public static void startTorch(){
+        preview.enableTorch(!preview.isTorchOn());
+    }
+
     public static void startCamera(LifecycleOwner lifecycleOwner, TextureView viewFinder) {
         cameraStarted = true;
 
@@ -51,7 +55,7 @@ public class CameraStreamer implements Runnable{
                 .setTargetResolution(new Size(1280,720) )
                 .build();
 
-        Preview preview = new Preview(previewConfig);
+        preview = new Preview(previewConfig);
 
         // Every time the viewfinder is updated, recompute layout
         preview.setOnPreviewOutputUpdateListener(output -> {
@@ -62,6 +66,7 @@ public class CameraStreamer implements Runnable{
             parent.addView(viewFinder, 0);
 
             viewFinder.setSurfaceTexture(output.getSurfaceTexture());
+
         });
 
 
@@ -78,12 +83,15 @@ public class CameraStreamer implements Runnable{
 
         CameraX.bindToLifecycle(lifecycleOwner, imageAnalysis, preview); //, preview, imageCapture)
 
+
     }
 
     public void updateTransform() {
         // TODO: Implement camera viewfinder transformations
 
     }
+
+
 
 
     @Override
