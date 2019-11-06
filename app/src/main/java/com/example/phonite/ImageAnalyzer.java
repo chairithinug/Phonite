@@ -30,8 +30,8 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
 
     private Context context;
 
-    public ImageAnalyzer (Context c){
-        context = c;
+    public ImageAnalyzer (/*Context c*/){
+        //context = c;
     }
 
     private int degreesToFirebaseRotation(int degrees) {
@@ -55,19 +55,18 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
 //        if (imageProxy == null || imageProxy.getImage() == null) {
 //            return;
 //        }
-//        Image mediaImage = imageProxy.getImage();
+        Image mediaImage = imageProxy.getImage();
         int rotation = degreesToFirebaseRotation(degrees);
-//        FirebaseVisionImage image =
-//                FirebaseVisionImage.fromMediaImage(mediaImage, rotation);
-
-        FirebaseVisionImage image;
+        FirebaseVisionImage image =
+                FirebaseVisionImage.fromMediaImage(mediaImage, rotation);
+//        FirebaseVisionImage image;
         try {
-//            Uri resUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE +
-//                    "://" + context.getResources())
-            image = FirebaseVisionImage.fromFilePath(context, Uri.parse("android.resource://com.example.phonite/drawable/nice"));
+////            Uri resUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE +
+////                    "://" + context.getResources())
+//            image = FirebaseVisionImage.fromFilePath(context, Uri.parse("android.resource://com.example.phonite/drawable/nice"));
             FirebaseVisionImageLabeler labeler = FirebaseVision.getInstance()
                     .getOnDeviceImageLabeler();
-
+//
             Log.d("IMGA", "HELLLOOOOOOO");
 
             labeler.processImage(image)
@@ -94,50 +93,8 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
                         }
                     });
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-//        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(Bitmap.createBitmap(100,100,Bitmap.Config.ARGB_8888));
-        // Pass image to an ML Kit Vision API
-        // ...
-
-//        // Live detection and tracking
-//        FirebaseVisionObjectDetectorOptions options =
-//                new FirebaseVisionObjectDetectorOptions.Builder()
-//                        .setDetectorMode(FirebaseVisionObjectDetectorOptions.STREAM_MODE)
-//                        .enableClassification()  // Optional
-//                        .build();
-
-//        FirebaseVisionObjectDetector objectDetector =
-//                FirebaseVision.getInstance().getOnDeviceObjectDetector();
-//        objectDetector.processImage(image)
-//                .addOnSuccessListener(
-//                        new OnSuccessListener<List<FirebaseVisionObject>>() {
-//                            @Override
-//                            public void onSuccess(List<FirebaseVisionObject> detectedObjects) {
-//                                // Task completed successfully
-//                                // ...
-//                                Log.d("IMGA", "onSuccess: ");
-//                                // The list of detected objects contains one item if multiple object detection wasn't enabled.
-//                                for (FirebaseVisionObject obj : detectedObjects) {
-//                                    Integer id = obj.getTrackingId();
-//                                    Rect bounds = obj.getBoundingBox();
-//
-//                                    // If classification was enabled:
-//                                    int category = obj.getClassificationCategory();
-//                                    Float confidence = obj.getClassificationConfidence();
-//                                    Log.d("IMGA", "onSuccess: " + id + " " + category + " " + confidence);
-//                                }
-//                            }
-//                        })
-//                .addOnFailureListener(
-//                        new OnFailureListener() {
-//                            @Override
-//                            public void onFailure(@NonNull Exception e) {
-//                                // Task failed with an exception
-//                                // ...
-//                                Log.d("IMGA", "onFailure:");
-//                            }
-//                        });
     }
 }

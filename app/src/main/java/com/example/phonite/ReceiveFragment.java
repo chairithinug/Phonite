@@ -82,7 +82,7 @@ public class ReceiveFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "Camera click");
-                ImageAnalyzer imageAnalyzer = new ImageAnalyzer(context);
+                ImageAnalyzer imageAnalyzer = new ImageAnalyzer();
                 imageAnalyzer.analyze(null,0);
             }
         });

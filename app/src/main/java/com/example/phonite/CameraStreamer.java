@@ -26,7 +26,7 @@ import androidx.lifecycle.LifecycleOwner;
 public class CameraStreamer implements Runnable{
 
 
-    private Context context;
+    private static Context context;
     private static ExecutorService executor = Executors.newSingleThreadExecutor();
     private static boolean cameraStarted;
     public static Preview preview;
@@ -79,7 +79,8 @@ public class CameraStreamer implements Runnable{
 
         ImageAnalysis imageAnalysis = new ImageAnalysis(analyzerConfig);
 
-        imageAnalysis.setAnalyzer(executor, new BrightnessAnalyzer());
+//        imageAnalysis.setAnalyzer(executor, new BrightnessAnalyzer());
+        imageAnalysis.setAnalyzer(executor, new ImageAnalyzer());
 
         CameraX.bindToLifecycle(lifecycleOwner, imageAnalysis, preview); //, preview, imageCapture)
 
