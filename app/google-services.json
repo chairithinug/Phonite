@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "448635872142",
+    "firebase_url": "https://phoniteece454.firebaseio.com",
+    "project_id": "phoniteece454",
+    "storage_bucket": "phoniteece454.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:448635872142:android:b76838e254fd57e878badf",
+        "android_client_info": {
+          "package_name": "com.example.phonite"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "448635872142-evqq013t9vu3m6ta1u6scf24g357lkt7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCI1crd7lgNkp3hgD4BxxuhpfBc4Xn0tgQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "448635872142-evqq013t9vu3m6ta1u6scf24g357lkt7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

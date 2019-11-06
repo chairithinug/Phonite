@@ -1,11 +1,15 @@
 package com.example.phonite;
 
-
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+
+import android.content.Context;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraManager;
+
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Context;
@@ -13,24 +17,44 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.ml.vision.FirebaseVision;
+import com.google.firebase.ml.vision.objects.FirebaseVisionObject;
+import com.google.firebase.ml.vision.objects.FirebaseVisionObjectDetector;
+import com.google.firebase.ml.vision.objects.FirebaseVisionObjectDetectorOptions;
+
+import java.util.List;
 
 import static android.content.ContentValues.TAG;
-
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class ReceiveFragment extends Fragment {
+
     TextView textLight;
     TextView hit;
     SensorManager sensorManager;
     Sensor sensor;
     String sx;
     float prevBrightness;
+
+    public final String TAG = "Analyze";
+
+    public TextView modeTextR;
+    public Button btnAnalyze;
+    private Context context;
 
     public ReceiveFragment() {
         // empty public constructor
@@ -42,11 +66,27 @@ public class ReceiveFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_receive, container, false);
+
         sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         textLight = (TextView) view.findViewById(R.id.textLight);
         hit = (TextView) view.findViewById(R.id.hit);
         hit.setText("");
+
+
+        modeTextR = view.findViewById(R.id.modeTextR);
+        btnAnalyze = view.findViewById(R.id.btnAnalyze);
+        context = getActivity().getApplicationContext();
+
+        btnAnalyze.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "Camera click");
+                ImageAnalyzer imageAnalyzer = new ImageAnalyzer(context);
+                imageAnalyzer.analyze(null,0);
+            }
+        });
+
         return view;
     }
 

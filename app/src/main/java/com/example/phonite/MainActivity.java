@@ -51,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
                     fm.beginTransaction().hide(active).show(fragment2).commit();
                     active = fragment2;
                     return true;
-
             }
             return false;
         }
