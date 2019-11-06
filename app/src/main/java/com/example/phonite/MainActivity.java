@@ -10,9 +10,6 @@ import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-//import android.support.design.widget.BottomNavigationView;
-
-
 public class MainActivity extends AppCompatActivity {
 
     final Fragment fragment1 = new FireFragment();
@@ -28,10 +25,11 @@ public class MainActivity extends AppCompatActivity {
         navView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         navView.getMenu().getItem(0).setChecked(true);
         fm.beginTransaction().add(R.id.main_container, fragment1, "1").show(fragment1).commit();
-        fm.beginTransaction().add(R.id.main_container,fragment2, "2").hide(fragment2).commit();
+        fm.beginTransaction().add(R.id.main_container, fragment2, "2").hide(fragment2).commit();
 
 
     }
+
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
         @Override

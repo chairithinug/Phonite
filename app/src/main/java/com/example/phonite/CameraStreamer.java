@@ -1,22 +1,22 @@
-    package com.example.phonite;
+package com.example.phonite;
 
-    import android.content.Context;
-    import android.util.Log;
-    import android.util.Size;
-    import android.view.TextureView;
-    import android.view.ViewGroup;
+import android.content.Context;
+import android.util.Log;
+import android.util.Size;
+import android.view.TextureView;
+import android.view.ViewGroup;
 
-    import androidx.camera.core.CameraX;
-    import androidx.camera.core.ImageAnalysis;
-    import androidx.camera.core.ImageAnalysisConfig;
-    import androidx.camera.core.Preview;
-    import androidx.camera.core.PreviewConfig;
-    import androidx.lifecycle.LifecycleOwner;
+import androidx.camera.core.CameraX;
+import androidx.camera.core.ImageAnalysis;
+import androidx.camera.core.ImageAnalysisConfig;
+import androidx.camera.core.Preview;
+import androidx.camera.core.PreviewConfig;
+import androidx.lifecycle.LifecycleOwner;
 
-    import java.util.concurrent.ExecutorService;
-    import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public class CameraStreamer implements Runnable{
+public class CameraStreamer implements Runnable {
 
 
     private static Context context;
@@ -27,7 +27,7 @@ public class CameraStreamer implements Runnable{
     // Have questions on how a camera works? look at this source:
     // https://medium.com/androiddevelopers/understanding-android-camera-capture-sessions-and-requests-4e54d9150295
     // https://docs.microsoft.com/en-us/dotnet/api/android.hardware.camera2.cameramanager.opencamera?view=xamarin-android-sdk-9
-    public CameraStreamer(Context context){
+    public CameraStreamer(Context context) {
 
         CameraStreamer.context = context;
         cameraStarted = false;
@@ -35,7 +35,7 @@ public class CameraStreamer implements Runnable{
 
     }
 
-    public static void startTorch(){
+    public static void startTorch() {
         preview.enableTorch(!preview.isTorchOn());
     }
 
@@ -45,7 +45,7 @@ public class CameraStreamer implements Runnable{
         Log.d("CameraStreamer", "in start Camera");
 
         PreviewConfig previewConfig = new PreviewConfig.Builder()
-                .setTargetResolution(new Size(1280,720) )
+                .setTargetResolution(new Size(1280, 720))
                 .build();
 
         preview = new Preview(previewConfig);
@@ -63,10 +63,9 @@ public class CameraStreamer implements Runnable{
         });
 
 
-
         // Setup image analysis pipeline that computes average pixel luminance
         ImageAnalysisConfig analyzerConfig = new ImageAnalysisConfig.Builder()
-                .setTargetResolution(new Size(1280,720) )
+                .setTargetResolution(new Size(1280, 720))
                 .setImageReaderMode(ImageAnalysis.ImageReaderMode.ACQUIRE_LATEST_IMAGE)
                 .build();
 
@@ -86,14 +85,11 @@ public class CameraStreamer implements Runnable{
     }
 
 
-
-
     @Override
     public void run() {
-        if (!cameraStarted){
+        if (!cameraStarted) {
             return;
         }
-
 
 
     }

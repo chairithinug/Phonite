@@ -22,7 +22,7 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
 
     private Context context;
 
-    public ImageAnalyzer (/*Context c*/){
+    public ImageAnalyzer(/*Context c*/) {
         //context = c;
     }
 
@@ -68,7 +68,7 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
                             // Task completed successfully
                             // ...
                             Log.d("IMGA", "asdfghjkl;'");
-                            for (FirebaseVisionImageLabel label: labels) {
+                            for (FirebaseVisionImageLabel label : labels) {
                                 String text = label.getText();
                                 String entityId = label.getEntityId();
                                 float confidence = label.getConfidence();

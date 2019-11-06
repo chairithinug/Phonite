@@ -61,7 +61,7 @@ public class ReceiveFragment extends Fragment {
             public void onClick(View v) {
                 Log.d(TAG, "Camera click");
                 ImageAnalyzer imageAnalyzer = new ImageAnalyzer();
-                imageAnalyzer.analyze(null,0);
+                imageAnalyzer.analyze(null, 0);
             }
         });
 
@@ -81,13 +81,13 @@ public class ReceiveFragment extends Fragment {
     public SensorEventListener lightListener = new SensorEventListener() {
         public void onSensorChanged(SensorEvent event) {
             float x = event.values[0];
-            if (x > 2*prevBrightness && x > 150) {
+            if (x > 2 * prevBrightness && x > 150) {
                 Log.d("onSensorChanged FLS", String.valueOf(x));
                 hit.setTextColor(Color.parseColor("#ff0000"));
                 hit.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        Log.d(TAG,"printed HIT?");
+                        Log.d(TAG, "printed HIT?");
                         hit.setText("HIT");
                     }
                 }, 600);
