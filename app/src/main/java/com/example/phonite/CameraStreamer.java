@@ -46,7 +46,7 @@ public class CameraStreamer implements Runnable {
         Log.d("CameraStreamer", "in start Camera");
 
         PreviewConfig previewConfig = new PreviewConfig.Builder()
-                .setTargetResolution(new Size(1280, 720))
+                .setTargetResolution(new Size(1440, 2560))
                 .build();
 
         preview = new Preview(previewConfig);
