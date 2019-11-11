@@ -25,14 +25,10 @@ public class CameraStreamer implements Runnable {
     public static Preview preview;
     public static ImageAnalyzer buttonConnector;
 
-    // Have questions on how a camera works? look at this source:
-    // https://medium.com/androiddevelopers/understanding-android-camera-capture-sessions-and-requests-4e54d9150295
-    // https://docs.microsoft.com/en-us/dotnet/api/android.hardware.camera2.cameramanager.opencamera?view=xamarin-android-sdk-9
     public CameraStreamer(Context context) {
 
         CameraStreamer.context = context;
         cameraStarted = false;
-
 
     }
 
