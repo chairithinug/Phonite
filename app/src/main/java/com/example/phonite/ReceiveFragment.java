@@ -54,6 +54,7 @@ public class ReceiveFragment extends Fragment {
 
     public TextView modeTextR;
     public Button btnAnalyze;
+    public Button btnFaceDetect;
     private Context context;
 
     public ReceiveFragment() {
@@ -76,6 +77,7 @@ public class ReceiveFragment extends Fragment {
 
         modeTextR = view.findViewById(R.id.modeTextR);
         btnAnalyze = view.findViewById(R.id.btnAnalyze);
+        btnFaceDetect = view.findViewById(R.id.btnFaceDetect);
         context = getActivity().getApplicationContext();
 
         btnAnalyze.setOnClickListener(new View.OnClickListener() {
@@ -84,6 +86,15 @@ public class ReceiveFragment extends Fragment {
                 Log.d(TAG, "Camera click");
                 ImageAnalyzer imageAnalyzer = new ImageAnalyzer(context);
                 imageAnalyzer.analyze(null,0);
+            }
+        });
+
+        btnFaceDetect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "Camera click");
+                ImageAnalyzer imageAnalyzer = new ImageAnalyzer(context);
+                imageAnalyzer.detectFace(null,0);
             }
         });
 
