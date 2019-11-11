@@ -1,11 +1,7 @@
 package com.example.phonite;
 
-import android.content.ContentResolver;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Rect;
 import android.media.Image;
-import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -25,19 +21,15 @@ import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceLandmark;
 import com.google.firebase.ml.vision.label.FirebaseVisionImageLabel;
 import com.google.firebase.ml.vision.label.FirebaseVisionImageLabeler;
-import com.google.firebase.ml.vision.objects.FirebaseVisionObject;
-import com.google.firebase.ml.vision.objects.FirebaseVisionObjectDetector;
-import com.google.firebase.ml.vision.objects.FirebaseVisionObjectDetectorOptions;
 
-import java.io.IOException;
 import java.util.List;
 
 public class ImageAnalyzer implements ImageAnalysis.Analyzer {
 
     private Context context;
 
-    public ImageAnalyzer (Context c){
-        context = c;
+    public ImageAnalyzer(/*Context c*/) {
+        //context = c;
     }
 
     private int degreesToFirebaseRotation(int degrees) {
@@ -61,19 +53,18 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
 //        if (imageProxy == null || imageProxy.getImage() == null) {
 //            return;
 //        }
-//        Image mediaImage = imageProxy.getImage();
+        Image mediaImage = imageProxy.getImage();
         int rotation = degreesToFirebaseRotation(degrees);
-//        FirebaseVisionImage image =
-//                FirebaseVisionImage.fromMediaImage(mediaImage, rotation);
-
-        FirebaseVisionImage image;
+        FirebaseVisionImage image =
+                FirebaseVisionImage.fromMediaImage(mediaImage, rotation);
+//        FirebaseVisionImage image;
         try {
-//            Uri resUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE +
-//                    "://" + context.getResources())
-            image = FirebaseVisionImage.fromFilePath(context, Uri.parse("android.resource://com.example.phonite/drawable/nice"));
+////            Uri resUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE +
+////                    "://" + context.getResources())
+//            image = FirebaseVisionImage.fromFilePath(context, Uri.parse("android.resource://com.example.phonite/drawable/nice"));
             FirebaseVisionImageLabeler labeler = FirebaseVision.getInstance()
                     .getOnDeviceImageLabeler();
-
+//
             Log.d("IMGA", "HELLLOOOOOOO");
 
             labeler.processImage(image)
@@ -83,7 +74,7 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
                             // Task completed successfully
                             // ...
                             Log.d("IMGA", "asdfghjkl;'");
-                            for (FirebaseVisionImageLabel label: labels) {
+                            for (FirebaseVisionImageLabel label : labels) {
                                 String text = label.getText();
                                 String entityId = label.getEntityId();
                                 float confidence = label.getConfidence();
@@ -100,9 +91,10 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
                         }
                     });
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
+<<<<<<< HEAD
     }
 
     public void detectFace(ImageProxy imageProxy, int degrees) {
@@ -174,5 +166,7 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
         } catch (IOException e) {
             e.printStackTrace();
         }
+=======
+>>>>>>> 1633dd4e15d719b835a3089ed459454b0b371d52
     }
 }

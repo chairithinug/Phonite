@@ -1,25 +1,12 @@
 package com.example.phonite;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-
-import android.content.Context;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraManager;
-
 import android.os.Bundle;
-import android.app.Activity;
-import android.content.Context;
-import android.os.SystemClock;
-import android.util.Log;
-import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,16 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.ml.vision.FirebaseVision;
-import com.google.firebase.ml.vision.objects.FirebaseVisionObject;
-import com.google.firebase.ml.vision.objects.FirebaseVisionObjectDetector;
-import com.google.firebase.ml.vision.objects.FirebaseVisionObjectDetectorOptions;
-
-import java.util.List;
-
-import static android.content.ContentValues.TAG;
+import androidx.fragment.app.Fragment;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -70,8 +48,8 @@ public class ReceiveFragment extends Fragment {
 
         sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-        textLight = (TextView) view.findViewById(R.id.textLight);
-        hit = (TextView) view.findViewById(R.id.hit);
+        textLight = view.findViewById(R.id.textLight);
+        hit = view.findViewById(R.id.hit);
         hit.setText("");
 
 
@@ -84,8 +62,8 @@ public class ReceiveFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "Camera click");
-                ImageAnalyzer imageAnalyzer = new ImageAnalyzer(context);
-                imageAnalyzer.analyze(null,0);
+                ImageAnalyzer imageAnalyzer = new ImageAnalyzer();
+                imageAnalyzer.analyze(null, 0);
             }
         });
 
@@ -114,13 +92,13 @@ public class ReceiveFragment extends Fragment {
     public SensorEventListener lightListener = new SensorEventListener() {
         public void onSensorChanged(SensorEvent event) {
             float x = event.values[0];
-            if (x > 2*prevBrightness && x > 150) {
+            if (x > 2 * prevBrightness && x > 150) {
                 Log.d("onSensorChanged FLS", String.valueOf(x));
                 hit.setTextColor(Color.parseColor("#ff0000"));
                 hit.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        Log.d(TAG,"printed HIT?");
+                        Log.d(TAG, "printed HIT?");
                         hit.setText("HIT");
                     }
                 }, 600);
@@ -137,7 +115,7 @@ public class ReceiveFragment extends Fragment {
             textLight.post(new Runnable() {
                 @Override
                 public void run() {
-                    textLight.setText((CharSequence) sx);
+                    textLight.setText(sx);
                 }
             });
             prevBrightness = x;

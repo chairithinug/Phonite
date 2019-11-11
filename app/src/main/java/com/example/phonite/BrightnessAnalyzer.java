@@ -2,15 +2,13 @@ package com.example.phonite;
 
 import android.util.Log;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageProxy;
+
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class BrightnessAnalyzer implements ImageAnalysis.Analyzer {
 
@@ -28,7 +26,7 @@ public class BrightnessAnalyzer implements ImageAnalysis.Analyzer {
 
             // Convert the data into an array of pixel values
             ArrayList<Integer> pixels = new ArrayList<Integer>();
-            for(Byte it : data){
+            for (Byte it : data) {
                 pixels.add(it.intValue() & 0xFF);
             }
 
@@ -40,21 +38,21 @@ public class BrightnessAnalyzer implements ImageAnalysis.Analyzer {
         }
     }
 
-    private Integer average(List<Integer> a){
+    private Integer average(List<Integer> a) {
 
         int size = a.size();
         int sum = 0;
-        for (Integer curr : a){
+        for (Integer curr : a) {
             sum += curr;
         }
-        return sum/size;
+        return sum / size;
 
     }
 
-    private Byte[] toByteArray(ByteBuffer byteBuffer){
+    private Byte[] toByteArray(ByteBuffer byteBuffer) {
         byteBuffer.rewind();
         Byte[] toReturn = new Byte[byteBuffer.remaining()];
-        for(int i=0; i < toReturn.length; i++){
+        for (int i = 0; i < toReturn.length; i++) {
             toReturn[i] = byteBuffer.get(i);
         }
         return toReturn;

@@ -4,17 +4,8 @@ package com.example.phonite;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.Camera;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.TextureView;
@@ -24,9 +15,10 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import static android.content.ContentValues.TAG;
-import static android.content.Context.CAMERA_SERVICE;
-
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -60,21 +52,21 @@ public class FireFragment extends Fragment {
         if (requestCode == 10) {
             if (allPermissionsGranted()) {
                 CameraStreamer.startCamera(this, viewFinder);
-                Log.d("MATIN ACT","WE GET PERMISSIONS GRANTED");
+                Log.d("MATIN ACT", "WE GET PERMISSIONS GRANTED");
             } else {
                 Toast.makeText(getContext(),
                         "Permissions not granted by the user.",
                         Toast.LENGTH_SHORT).show();
 
-                Log.d("MATIN ACT","WE DIDNT GET PERMISSIONS GRANTED");
+                Log.d("MATIN ACT", "WE DIDNT GET PERMISSIONS GRANTED");
                 getActivity().finish();
             }
         }
     }
 
-    private boolean allPermissionsGranted(){
-        for(String thisPermission : PERMISSIONS_NEEDED){
-            if(PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(getContext(), thisPermission)){
+    private boolean allPermissionsGranted() {
+        for (String thisPermission : PERMISSIONS_NEEDED) {
+            if (PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(getContext(), thisPermission)) {
                 return false;
             }
         }
@@ -98,9 +90,9 @@ public class FireFragment extends Fragment {
                 Log.d(TAG, "Camera click");
                 //CameraManager cameraManager = (CameraManager) context.getSystemService(context.CAMERA_SERVICE);
                 try {
-                  //  String cameraId = cameraManager.getCameraIdList()[0];
+                    //  String cameraId = cameraManager.getCameraIdList()[0];
                     managerOfSound(goodbye);
-                  //  cameraManager.setTorchMode(cameraId, true);
+                    //  cameraManager.setTorchMode(cameraId, true);
                     CameraStreamer.startTorch();
                     try {
                         Thread.sleep(500);
@@ -111,22 +103,22 @@ public class FireFragment extends Fragment {
                     //cameraManager.setTorchMode(cameraId, false);
                 } catch (Exception e) {
                 }/*
-                */
+                 */
 //                btnCamera.setEnabled(true);
                 btnCamera.cancelPendingInputEvents();
             }
         });
         // Inflate the layout for this fragment
 
-        viewFinder = (TextureView) view.findViewById(R.id.view_finder);
+        viewFinder = view.findViewById(R.id.view_finder);
 
 
-        if(allPermissionsGranted()){
+        if (allPermissionsGranted()) {
             Log.d(TAG, "STARTING CAMERA!!!!!!");
 
             CameraStreamer.startCamera(getActivity(), viewFinder); //start camera if permission has been granted by user
-        } else{
-            ActivityCompat.requestPermissions( getActivity(), REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
+        } else {
+            ActivityCompat.requestPermissions(getActivity(), REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
         }
         return view;
     }
