@@ -20,6 +20,7 @@ import com.google.firebase.ml.vision.common.FirebaseVisionPoint;
 import com.google.firebase.ml.vision.face.FirebaseVisionFace;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceContour;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector;
+import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceLandmark;
 import com.google.firebase.ml.vision.label.FirebaseVisionImageLabel;
 import com.google.firebase.ml.vision.label.FirebaseVisionImageLabeler;
@@ -67,10 +68,17 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
         FirebaseVisionImage image =
                 FirebaseVisionImage.fromMediaImage(mediaImage, rotation);
 
+            // High-accuracy landmark detection and face classification
+            FirebaseVisionFaceDetectorOptions highAccuracyOpts =
+                    new FirebaseVisionFaceDetectorOptions.Builder()
+                            .setPerformanceMode(FirebaseVisionFaceDetectorOptions.ACCURATE)
+                            .setLandmarkMode(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
+                            .setClassificationMode(FirebaseVisionFaceDetectorOptions.ALL_CLASSIFICATIONS)
+                            .build();
 
             try {
                 FirebaseVisionFaceDetector detector = FirebaseVision.getInstance()
-                        .getVisionFaceDetector();
+                        .getVisionFaceDetector(highAccuracyOpts);
 
                 detector.detectInImage(image)
                         .addOnSuccessListener(
