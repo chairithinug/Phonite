@@ -23,6 +23,7 @@ public class CameraStreamer implements Runnable {
     private static ExecutorService executor = Executors.newSingleThreadExecutor();
     private static boolean cameraStarted;
     public static Preview preview;
+    public static ImageAnalyzer buttonConnector;
 
     // Have questions on how a camera works? look at this source:
     // https://medium.com/androiddevelopers/understanding-android-camera-capture-sessions-and-requests-4e54d9150295
@@ -72,11 +73,17 @@ public class CameraStreamer implements Runnable {
         ImageAnalysis imageAnalysis = new ImageAnalysis(analyzerConfig);
 
 //        imageAnalysis.setAnalyzer(executor, new BrightnessAnalyzer());
-        imageAnalysis.setAnalyzer(executor, new ImageAnalyzer());
+        buttonConnector = new ImageAnalyzer();
+
+        imageAnalysis.setAnalyzer(executor, buttonConnector);
 
         CameraX.bindToLifecycle(lifecycleOwner, imageAnalysis, preview); //, preview, imageCapture)
 
 
+    }
+
+    public ImageAnalyzer getImageAnalyzer(){
+        return this.buttonConnector;
     }
 
     public void updateTransform() {

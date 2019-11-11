@@ -90,6 +90,7 @@ public class FireFragment extends Fragment {
                 Log.d(TAG, "Camera click");
                 //CameraManager cameraManager = (CameraManager) context.getSystemService(context.CAMERA_SERVICE);
                 try {
+                    CameraStreamer.buttonConnector.setAnalyzeFlag();
                     //  String cameraId = cameraManager.getCameraIdList()[0];
                     managerOfSound(goodbye);
                     //  cameraManager.setTorchMode(cameraId, true);
