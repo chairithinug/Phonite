@@ -79,9 +79,18 @@ public class MainActivity extends AppCompatActivity {
         sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         textLight = findViewById(R.id.textLight);
+        textLight.setTextColor(Color.WHITE);
         hit = findViewById(R.id.hit);
         hit.setText("");
 
+        sensorManager.registerListener(lightListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+
+    }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+        sensorManager.unregisterListener(lightListener);
     }
 
     @Override
