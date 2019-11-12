@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        MarkMedia mm = new MarkMedia(getApplicationContext());
 
         btnCamera = (Button) findViewById(R.id.btnCamera);
 
@@ -53,7 +54,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "Camera click");
                 try {
                     CameraStreamer.buttonConnector.setAnalyzeFlag();
-                    managerOfSound(goodbye);
+                    mm.setSound(R.raw.laser);
+                    mm.playSound();
                     CameraStreamer.startTorch();
                     try {
                         Thread.sleep(500);
