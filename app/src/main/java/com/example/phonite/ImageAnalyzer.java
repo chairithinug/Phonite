@@ -55,14 +55,23 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
         }
     }
 
-    public void setAnalyzeFlag(boolean val) {
-        analyzeFlag = val;
+    public void setAnalyzeFlag() {
+        analyzeFlag = true;
         Log.d(TAG, "Setting analyze flag");
+        while (analyzeFlag){
+            try {
+                Thread.sleep(250);
+            }catch( Exception ex){
+
+            }
+        }
+
     }
 
 
     @Override
     public void analyze(ImageProxy imageProxy, int degrees) {
+
         if (analyzeFlag) {
 
             Image mediaImage = imageProxy.getImage();
@@ -133,55 +142,6 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
 
         skipper++;
     }
-
-
-// THIS BELLOW IS THE FIRST ITERATION
-//    @Override
-//    public void analyze(ImageProxy imageProxy, int degrees) {
-////        if (imageProxy == null || imageProxy.getImage() == null) {
-////            return;
-////        }
-//        Image mediaImage = imageProxy.getImage();
-//        int rotation = degreesToFirebaseRotation(degrees);
-//        FirebaseVisionImage image =
-//                FirebaseVisionImage.fromMediaImage(mediaImage, rotation);
-////        FirebaseVisionImage image;
-//        try {
-//////            Uri resUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE +
-//////                    "://" + context.getResources())
-////            image = FirebaseVisionImage.fromFilePath(context, Uri.parse("android.resource://com.example.phonite/drawable/nice"));
-//            FirebaseVisionImageLabeler labeler = FirebaseVision.getInstance()
-//                    .getOnDeviceImageLabeler();
-//
-//            labeler.processImage(image)
-//                    .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionImageLabel>>() {
-//                        @Override
-//                        public void onSuccess(List<FirebaseVisionImageLabel> labels) {
-//                            // Task completed successfully
-//                            // ...
-//                            Log.d("IMGA", "asdfghjkl;'");
-//                            for (FirebaseVisionImageLabel label : labels) {
-//                                String text = label.getText();
-//                                String entityId = label.getEntityId();
-//                                float confidence = label.getConfidence();
-//                                Log.d("IMGA", "onSuccess: " + text + " " + entityId + " " + confidence);
-//                            }
-//
-//                        }
-//                    })
-//                    .addOnFailureListener(new OnFailureListener() {
-//                        @Override
-//                        public void onFailure(@NonNull Exception e) {
-//                            // Task failed with an exception
-//                            // ...
-//                        }
-//                    });
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//    }
 
     // This is the Detection Module Alex wrote for face Detection
     public void detectFace(ImageProxy imageProxy, int degrees) {

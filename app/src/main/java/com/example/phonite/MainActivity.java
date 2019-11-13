@@ -10,6 +10,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
@@ -40,36 +41,28 @@ public class MainActivity extends AppCompatActivity {
     private TextView hit;
     private SensorManager sensorManager;
     private Sensor sensor;
+    private FireRunnable fireRunnable;
+    private Handler threadHandler;
+    private MarkMedia mm;
+    private  ImageView blood_img;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        MarkMedia mm = new MarkMedia(getApplicationContext());
-        ImageView blood_img = (ImageView) findViewById(R.id.blood);
+        mm = new MarkMedia(getApplicationContext());
+        blood_img = (ImageView) findViewById(R.id.blood);
         btnFire = (Button) findViewById(R.id.btnFire);
+        fireRunnable = new FireRunnable();
+        threadHandler = new Handler();
 
         btnFire.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "Camera click");
                 try {
-                    CameraStreamer.buttonConnector.setAnalyzeFlag(true);
-                    CameraStreamer.startTorch();
-                    if (ImageAnalyzer.FaceDetected) {
-                        bloodSplatter(blood_img);
-                        mm.setSound(R.raw.hitmarker);
-                        mm.playSound();
-                        ImageAnalyzer.FaceDetected = false;
-                    } else{
-                        mm.setSound(R.raw.laser);
-                        mm.playSound();
-                    }
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                    }
-                    CameraStreamer.startTorch();
+                    threadHandler.post(fireRunnable);
+                    new Thread(fireRunnable).start();
                 } catch (Exception e) {
                 }
                 btnFire.cancelPendingInputEvents();
@@ -183,5 +176,28 @@ public class MainActivity extends AppCompatActivity {
         public void onAccuracyChanged(Sensor sensor, int acc) {
         }
     };
+
+    public class FireRunnable implements Runnable{
+
+        @Override
+        public void run() {
+
+            CameraStreamer.startTorch();
+            CameraStreamer.buttonConnector.setAnalyzeFlag();
+            CameraStreamer.startTorch(); // stops torch
+
+            if (ImageAnalyzer.FaceDetected) {
+
+                bloodSplatter(blood_img);
+                mm.setSound(R.raw.hitmarker);
+                mm.playSound();
+                ImageAnalyzer.FaceDetected = false;
+            } else{
+                mm.setSound(R.raw.laser);
+                mm.playSound();
+            }
+
+        }
+    }
 
 }
