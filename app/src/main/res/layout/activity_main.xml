@@ -53,7 +53,7 @@
     </LinearLayout>
 
     <ImageView
-        android:id="@+id/imageView4"
+        android:id="@+id/crosshair"
         android:layout_width="344dp"
         android:layout_height="677dp"
         android:layout_marginStart="33dp"
@@ -65,6 +65,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/crosshair2" />
+
+    <ImageView
+        android:id="@+id/blood"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="148dp"
+        android:layout_marginBottom="210dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="invisible"
+        app:srcCompat="@drawable/blood" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

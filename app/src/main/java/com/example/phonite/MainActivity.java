@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         MarkMedia mm = new MarkMedia(getApplicationContext());
-
+        ImageView blood_img = (ImageView) findViewById(R.id.blood);
         btnFire = (Button) findViewById(R.id.btnFire);
 
         btnFire.setOnClickListener(new View.OnClickListener() {
@@ -58,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                     mm.playSound();
                     CameraStreamer.startTorch();
                     if (ImageAnalyzer.FaceDetected) {
-
+                        bloodSplatter(blood_img);
                     }
                     try {
                         Thread.sleep(500);
@@ -88,6 +89,24 @@ public class MainActivity extends AppCompatActivity {
         hit.setText("");
 
         sensorManager.registerListener(lightListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    private void bloodSplatter(ImageView blood_img)
+    {
+        blood_img.setVisibility(View.VISIBLE);
+//        int alpha = 255;
+//        new Thread(new Runnable() {
+//            public void run() {
+//                for(int i = 0; i < 256; i++){
+//                    blood_img.post(new Runnable() {
+//                        public void run() {
+//                            blood_img.setAlpha(alpha);
+//                        }
+//                    });
+//
+//                }
+//            }
+//        }).start();
     }
 
     @Override
