@@ -10,9 +10,13 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -61,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
                         mm.setSound(R.raw.hitmarker);
                         mm.playSound();
                         ImageAnalyzer.FaceDetected = false;
-                    } else{
+                    } else {
                         mm.setSound(R.raw.laser);
                         mm.playSound();
                     }
@@ -95,22 +99,23 @@ public class MainActivity extends AppCompatActivity {
         sensorManager.registerListener(lightListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
-    private void bloodSplatter(ImageView blood_img)
-    {
+    private void bloodSplatter(ImageView blood_img) {
         blood_img.setVisibility(View.VISIBLE);
-//        int alpha = 255;
-//        new Thread(new Runnable() {
-//            public void run() {
-//                for(int i = 0; i < 256; i++){
-//                    blood_img.post(new Runnable() {
-//                        public void run() {
-//                            blood_img.setAlpha(alpha);
-//                        }
-//                    });
-//
-//                }
-//            }
-//        }).start();
+        Animation fadeOut = new AlphaAnimation(1, 0);
+        fadeOut.setInterpolator(new AccelerateInterpolator());
+        fadeOut.setDuration(2000);
+
+        fadeOut.setAnimationListener(new Animation.AnimationListener()
+        {
+            public void onAnimationEnd(Animation animation)
+            {
+                blood_img.setVisibility(View.GONE);
+            }
+            public void onAnimationRepeat(Animation animation) {}
+            public void onAnimationStart(Animation animation) {}
+        });
+
+        blood_img.startAnimation(fadeOut);
     }
 
     @Override
