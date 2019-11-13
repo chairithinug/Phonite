@@ -2,6 +2,7 @@ package com.example.phonite;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.media.FaceDetector;
 import android.media.Image;
 import android.net.Uri;
 import android.util.Log;

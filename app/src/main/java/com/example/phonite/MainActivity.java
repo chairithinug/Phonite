@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Log.d(TAG, "Camera click");
                 try {
-                    threadHandler.post(fireRunnable);
+//                    threadHandler.post(fireRunnable);
                     new Thread(fireRunnable).start();
                 } catch (Exception e) {
                 }
@@ -187,8 +187,7 @@ public class MainActivity extends AppCompatActivity {
             CameraStreamer.startTorch(); // stops torch
 
             if (ImageAnalyzer.FaceDetected) {
-
-                bloodSplatter(blood_img);
+//                bloodSplatter(blood_img);
                 mm.setSound(R.raw.hitmarker);
                 mm.playSound();
                 ImageAnalyzer.FaceDetected = false;
