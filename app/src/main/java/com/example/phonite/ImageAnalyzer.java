@@ -33,7 +33,7 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
     private Context context;
     private int skipper = 0;
     public final String TAG = "ImageAnalyzer";
-    static public boolean analyzeFlag = false;
+    static private boolean analyzeFlag = false;
     public static boolean FaceDetected = false;
     private Runnable  doThisOnHit;
 
@@ -67,6 +67,10 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
 
             }
         }
+    }
+
+    public boolean getAnalyzeFlag(){
+        return analyzeFlag;
     }
 
 
@@ -123,6 +127,7 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
                                             if (face.getTrackingId() != FirebaseVisionFace.INVALID_ID) {
                                                 int id = face.getTrackingId();
                                             }
+                                            break;
                                         }
                                     }
                                 })

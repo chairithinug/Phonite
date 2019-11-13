@@ -184,8 +184,11 @@ public class MainActivity extends AppCompatActivity {
 
     public class FireRunnable implements Runnable{
 
+       // Thread.sleep(100);
+        
         @Override
         public void run() {
+            Log.d("HITS", "Inside FireRunnable");
 
             CameraStreamer.startTorch(); // start torch
             CameraStreamer.buttonConnector.setAnalyzeFlag();
@@ -194,6 +197,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
+
 
     public class RunMeOnHit implements Runnable{
         @Override
