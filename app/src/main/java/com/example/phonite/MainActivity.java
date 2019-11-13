@@ -179,22 +179,27 @@ public class MainActivity extends AppCompatActivity {
 
     public class FireRunnable implements Runnable{
 
+       // Thread.sleep(100);
+        
         @Override
         public void run() {
+            Log.d("HITS", "Inside FireRunnable");
 
             CameraStreamer.startTorch();
             CameraStreamer.buttonConnector.setAnalyzeFlag();
             CameraStreamer.startTorch(); // stops torch
-
             if (ImageAnalyzer.FaceDetected) {
+                Log.d("HITS", "Runnable inside face detected ");
+
 //                bloodSplatter(blood_img);
                 mm.setSound(R.raw.hitmarker);
-                mm.playSound();
+                Log.d("HITS", "getAnalyzeFlag value: " + CameraStreamer.buttonConnector.getAnalyzeFlag());
                 ImageAnalyzer.FaceDetected = false;
             } else{
+                Log.d("HITS", "Runnable inside no face detected ");
                 mm.setSound(R.raw.laser);
-                mm.playSound();
             }
+            mm.playSound();
 
         }
     }

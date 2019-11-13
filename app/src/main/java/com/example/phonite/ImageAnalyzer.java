@@ -33,7 +33,7 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
     private Context context;
     private int skipper = 0;
     public final String TAG = "ImageAnalyzer";
-    static public boolean analyzeFlag = false;
+    static private boolean analyzeFlag = false;
     public static boolean FaceDetected = false;
 
     public ImageAnalyzer(/*Context c*/) {
@@ -66,7 +66,12 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
 
             }
         }
+        Log.d("HITS", "setAnalyzeflag finished");
 
+    }
+
+    public boolean getAnalyzeFlag(){
+        return analyzeFlag;
     }
 
 
@@ -101,6 +106,8 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
                                         // Task completed successfully
                                         for (FirebaseVisionFace face : faces) {
                                             FaceDetected = true;
+                                            Log.d("HITS", "HIT DETECTED");
+
                                             // If landmark detection was enabled (mouth, ears, eyes, cheeks, and
                                             // nose available):
                                             FirebaseVisionFaceLandmark leftEar = face.getLandmark(FirebaseVisionFaceLandmark.LEFT_EAR);
@@ -123,6 +130,7 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
                                             if (face.getTrackingId() != FirebaseVisionFace.INVALID_ID) {
                                                 int id = face.getTrackingId();
                                             }
+                                            break;
                                         }
                                     }
                                 })
