@@ -36,7 +36,7 @@ public class CameraStreamer implements Runnable {
         preview.enableTorch(!preview.isTorchOn());
     }
 
-    public static void startCamera(LifecycleOwner lifecycleOwner, TextureView viewFinder) {
+    public static void startCamera(LifecycleOwner lifecycleOwner, TextureView viewFinder, Runnable runThisOnHit) {
         cameraStarted = true;
 
         Log.d("CameraStreamer", "in start Camera");
@@ -69,9 +69,10 @@ public class CameraStreamer implements Runnable {
         ImageAnalysis imageAnalysis = new ImageAnalysis(analyzerConfig);
 
 //        imageAnalysis.setAnalyzer(executor, new BrightnessAnalyzer());
-        buttonConnector = new ImageAnalyzer();
+        buttonConnector = new ImageAnalyzer(runThisOnHit);
 
         imageAnalysis.setAnalyzer(executor, buttonConnector);
+
 
         CameraX.bindToLifecycle(lifecycleOwner, imageAnalysis, preview); //, preview, imageCapture)
 

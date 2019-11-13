@@ -35,9 +35,10 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
     public final String TAG = "ImageAnalyzer";
     static public boolean analyzeFlag = false;
     public static boolean FaceDetected = false;
+    private Runnable  doThisOnHit;
 
-    public ImageAnalyzer(/*Context c*/) {
-        //context = c;
+    public ImageAnalyzer(Runnable doThisOnHit) {
+        this.doThisOnHit = doThisOnHit;
     }
 
     private int degreesToFirebaseRotation(int degrees) {
@@ -61,12 +62,11 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
         Log.d(TAG, "Setting analyze flag");
         while (analyzeFlag){
             try {
-                Thread.sleep(250);
+                Thread.currentThread().sleep(250);
             }catch( Exception ex){
 
             }
         }
-
     }
 
 
@@ -100,7 +100,7 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
                                         Log.d("IMGA", "YAY");
                                         // Task completed successfully
                                         for (FirebaseVisionFace face : faces) {
-                                            FaceDetected = true;
+                                            new Thread(doThisOnHit).run();
                                             // If landmark detection was enabled (mouth, ears, eyes, cheeks, and
                                             // nose available):
                                             FirebaseVisionFaceLandmark leftEar = face.getLandmark(FirebaseVisionFaceLandmark.LEFT_EAR);
@@ -138,83 +138,11 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            analyzeFlag = false;
         }
 
+        analyzeFlag = false;
         skipper++;
     }
 
-    // This is the Detection Module Alex wrote for face Detection
-    public void detectFace(ImageProxy imageProxy, int degrees) {
-
-        FirebaseVisionImage image;
-        try {
-            image = FirebaseVisionImage.fromFilePath(context, Uri.parse("android.resource://com.example.phonite/drawable/nice"));
-            FirebaseVisionImageLabeler labeler = FirebaseVision.getInstance()
-                    .getOnDeviceImageLabeler();
-
-            Log.d("IMGA", "in detect face");
-
-            FirebaseVisionFaceDetector detector = FirebaseVision.getInstance()
-                    .getVisionFaceDetector();
-
-            detector.detectInImage(image)
-                    .addOnSuccessListener(
-                            new OnSuccessListener<List<FirebaseVisionFace>>() {
-                                @Override
-                                public void onSuccess(List<FirebaseVisionFace> faces) {
-                                    Log.d("IMGA", "YAY");
-                                    // Task completed successfully
-                                    for (FirebaseVisionFace face : faces) {
-                                        Rect bounds = face.getBoundingBox();
-                                        float rotY = face.getHeadEulerAngleY();  // Head is rotated to the right rotY degrees
-                                        float rotZ = face.getHeadEulerAngleZ();  // Head is tilted sideways rotZ degrees
-
-                                        // If landmark detection was enabled (mouth, ears, eyes, cheeks, and
-                                        // nose available):
-                                        FirebaseVisionFaceLandmark leftEar = face.getLandmark(FirebaseVisionFaceLandmark.LEFT_EAR);
-                                        if (leftEar != null) {
-                                            FirebaseVisionPoint leftEarPos = leftEar.getPosition();
-                                            Log.d("LEFT EAR", leftEarPos.toString());
-                                        }
-
-                                        // If contour detection was enabled:
-                                        List<FirebaseVisionPoint> leftEyeContour =
-                                                face.getContour(FirebaseVisionFaceContour.LEFT_EYE).getPoints();
-                                        List<FirebaseVisionPoint> upperLipBottomContour =
-                                                face.getContour(FirebaseVisionFaceContour.UPPER_LIP_BOTTOM).getPoints();
-
-                                        // If classification was enabled:
-                                        if (face.getSmilingProbability() != FirebaseVisionFace.UNCOMPUTED_PROBABILITY) {
-                                            float smileProb = face.getSmilingProbability();
-                                            Log.d("SMILE PROB", String.valueOf(smileProb));
-                                        }
-                                        if (face.getRightEyeOpenProbability() != FirebaseVisionFace.UNCOMPUTED_PROBABILITY) {
-                                            float rightEyeOpenProb = face.getRightEyeOpenProbability();
-                                            Log.d("RIGHT EYE OPEN PROB", String.valueOf(rightEyeOpenProb));
-                                        }
-
-                                        // If face tracking was enabled:
-                                        if (face.getTrackingId() != FirebaseVisionFace.INVALID_ID) {
-                                            int id = face.getTrackingId();
-                                        }
-                                    }
-                                }
-                            })
-                    .addOnFailureListener(
-                            new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Log.d("IMGA", "NAY");
-                                    // Task failed with an exception
-                                    // ...
-                                }
-                            });
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
 
 }
