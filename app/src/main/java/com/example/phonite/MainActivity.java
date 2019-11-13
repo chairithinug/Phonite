@@ -53,12 +53,16 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Log.d(TAG, "Camera click");
                 try {
-                    CameraStreamer.buttonConnector.setAnalyzeFlag();
-                    mm.setSound(R.raw.laser);
-                    mm.playSound();
+                    CameraStreamer.buttonConnector.setAnalyzeFlag(true);
                     CameraStreamer.startTorch();
-                    if (ImageAnalyzer.FaceDetected) {
 
+                    if (ImageAnalyzer.FaceDetected) {
+                        mm.setSound(R.raw.hitmarker);
+                        mm.playSound();
+                        ImageAnalyzer.FaceDetected = false;
+                    } else{
+                        mm.setSound(R.raw.laser);
+                        mm.playSound();
                     }
                     try {
                         Thread.sleep(500);

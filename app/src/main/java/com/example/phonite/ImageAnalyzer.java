@@ -55,8 +55,8 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
         }
     }
 
-    public void setAnalyzeFlag() {
-        analyzeFlag = true;
+    public void setAnalyzeFlag(boolean val) {
+        analyzeFlag = val;
         Log.d(TAG, "Setting analyze flag");
     }
 
