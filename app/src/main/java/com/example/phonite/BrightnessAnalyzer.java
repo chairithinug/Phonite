@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class BrightnessAnalyzer implements ImageAnalysis.Analyzer {
-
+    public final String TAG = "BrightnessAnalyzer";
     private long lastAnalyzedTimestamp = 0;
 
     @Override

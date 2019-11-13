@@ -24,8 +24,8 @@ import androidx.core.content.ContextCompat;
 
 public class MainActivity extends AppCompatActivity {
 
-    public final String TAG = "MAIN";
-    public Button btnCamera;
+    public final String TAG = "MainActivity";
+    public Button btnFire;
     public TextureView viewFinder;
     private MediaPlayer mp = null;
     private String hello = "Hello!";
@@ -46,9 +46,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         MarkMedia mm = new MarkMedia(getApplicationContext());
 
-        btnCamera = (Button) findViewById(R.id.btnCamera);
+        btnFire = (Button) findViewById(R.id.btnFire);
 
-        btnCamera.setOnClickListener(new View.OnClickListener() {
+        btnFire.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "Camera click");
@@ -57,6 +57,9 @@ public class MainActivity extends AppCompatActivity {
                     mm.setSound(R.raw.laser);
                     mm.playSound();
                     CameraStreamer.startTorch();
+                    if (ImageAnalyzer.FaceDetected) {
+
+                    }
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
@@ -64,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
                     CameraStreamer.startTorch();
                 } catch (Exception e) {
                 }
-                btnCamera.cancelPendingInputEvents();
+                btnFire.cancelPendingInputEvents();
             }
         });
 
@@ -72,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
 
         if (allPermissionsGranted()) {
             Log.d(TAG, "STARTING CAMERA!!!!!!");
-
             CameraStreamer.startCamera(this, viewFinder); //start camera if permission has been granted by user
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
@@ -86,11 +88,10 @@ public class MainActivity extends AppCompatActivity {
         hit.setText("");
 
         sensorManager.registerListener(lightListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
-
     }
 
     @Override
-    public void onStop(){
+    public void onStop() {
         super.onStop();
         sensorManager.unregisterListener(lightListener);
     }
@@ -102,13 +103,13 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == 10) {
             if (allPermissionsGranted()) {
                 CameraStreamer.startCamera(this, viewFinder);
-                Log.d("MATIN ACT", "WE GET PERMISSIONS GRANTED");
+                Log.d(TAG, "WE GET PERMISSIONS GRANTED");
             } else {
                 Toast.makeText(this,
                         "Permissions not granted by the user.",
                         Toast.LENGTH_SHORT).show();
 
-                Log.d("MATIN ACT", "WE DIDNT GET PERMISSIONS GRANTED");
+                Log.d(TAG, "WE DIDNT GET PERMISSIONS GRANTED");
                 finish();
             }
         }
@@ -121,23 +122,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return true;
-    }
-
-    /**
-     * Manager of Sounds
-     */
-    protected void managerOfSound(String theText) {
-        if (mp != null) {
-            mp.reset();
-            mp.release();
-        }
-        if (theText == hello)
-            mp = MediaPlayer.create(this, R.raw.laser);
-        else if (theText == goodbye)
-            mp = MediaPlayer.create(this, R.raw.laser);
-        else
-            mp = MediaPlayer.create(this, R.raw.laser);
-        mp.start();
     }
 
     // For brightness analyzing

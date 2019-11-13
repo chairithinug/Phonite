@@ -18,7 +18,7 @@ import java.util.concurrent.Executors;
 
 public class CameraStreamer implements Runnable {
 
-
+    public final String TAG = "CameraStreamer";
     private static Context context;
     private static ExecutorService executor = Executors.newSingleThreadExecutor();
     private static boolean cameraStarted;
@@ -78,7 +78,7 @@ public class CameraStreamer implements Runnable {
 
     }
 
-    public ImageAnalyzer getImageAnalyzer(){
+    public ImageAnalyzer getImageAnalyzer() {
         return this.buttonConnector;
     }
 
