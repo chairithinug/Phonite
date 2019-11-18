@@ -2,6 +2,7 @@ package com.example.phonite;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.media.FaceDetector;
 import android.media.Image;
 import android.net.Uri;
 import android.util.Log;
@@ -32,11 +33,12 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
     private Context context;
     private int skipper = 0;
     public final String TAG = "ImageAnalyzer";
-    static public boolean analyzeFlag = false;
+    static private boolean analyzeFlag = false;
     public static boolean FaceDetected = false;
+    private Runnable  doThisOnHit;
 
-    public ImageAnalyzer(/*Context c*/) {
-        //context = c;
+    public ImageAnalyzer(Runnable doThisOnHit) {
+        this.doThisOnHit = doThisOnHit;
     }
 
     private int degreesToFirebaseRotation(int degrees) {
@@ -55,14 +57,26 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
         }
     }
 
-    public void setAnalyzeFlag(boolean val) {
-        analyzeFlag = val;
+    public void setAnalyzeFlag() {
+        analyzeFlag = true;
         Log.d(TAG, "Setting analyze flag");
+        while (analyzeFlag){
+            try {
+                Thread.currentThread().sleep(250);
+            }catch( Exception ex){
+
+            }
+        }
+    }
+
+    public boolean getAnalyzeFlag(){
+        return analyzeFlag;
     }
 
 
     @Override
     public void analyze(ImageProxy imageProxy, int degrees) {
+
         if (analyzeFlag) {
 
             Image mediaImage = imageProxy.getImage();
@@ -90,7 +104,7 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
                                         Log.d("IMGA", "YAY");
                                         // Task completed successfully
                                         for (FirebaseVisionFace face : faces) {
-                                            FaceDetected = true;
+                                            new Thread(doThisOnHit).run();
                                             // If landmark detection was enabled (mouth, ears, eyes, cheeks, and
                                             // nose available):
                                             FirebaseVisionFaceLandmark leftEar = face.getLandmark(FirebaseVisionFaceLandmark.LEFT_EAR);
@@ -113,6 +127,7 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
                                             if (face.getTrackingId() != FirebaseVisionFace.INVALID_ID) {
                                                 int id = face.getTrackingId();
                                             }
+                                            break;
                                         }
                                     }
                                 })
@@ -128,132 +143,11 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            analyzeFlag = false;
         }
 
+        analyzeFlag = false;
         skipper++;
     }
 
-
-// THIS BELLOW IS THE FIRST ITERATION
-//    @Override
-//    public void analyze(ImageProxy imageProxy, int degrees) {
-////        if (imageProxy == null || imageProxy.getImage() == null) {
-////            return;
-////        }
-//        Image mediaImage = imageProxy.getImage();
-//        int rotation = degreesToFirebaseRotation(degrees);
-//        FirebaseVisionImage image =
-//                FirebaseVisionImage.fromMediaImage(mediaImage, rotation);
-////        FirebaseVisionImage image;
-//        try {
-//////            Uri resUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE +
-//////                    "://" + context.getResources())
-////            image = FirebaseVisionImage.fromFilePath(context, Uri.parse("android.resource://com.example.phonite/drawable/nice"));
-//            FirebaseVisionImageLabeler labeler = FirebaseVision.getInstance()
-//                    .getOnDeviceImageLabeler();
-//
-//            labeler.processImage(image)
-//                    .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionImageLabel>>() {
-//                        @Override
-//                        public void onSuccess(List<FirebaseVisionImageLabel> labels) {
-//                            // Task completed successfully
-//                            // ...
-//                            Log.d("IMGA", "asdfghjkl;'");
-//                            for (FirebaseVisionImageLabel label : labels) {
-//                                String text = label.getText();
-//                                String entityId = label.getEntityId();
-//                                float confidence = label.getConfidence();
-//                                Log.d("IMGA", "onSuccess: " + text + " " + entityId + " " + confidence);
-//                            }
-//
-//                        }
-//                    })
-//                    .addOnFailureListener(new OnFailureListener() {
-//                        @Override
-//                        public void onFailure(@NonNull Exception e) {
-//                            // Task failed with an exception
-//                            // ...
-//                        }
-//                    });
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//    }
-
-    // This is the Detection Module Alex wrote for face Detection
-    public void detectFace(ImageProxy imageProxy, int degrees) {
-
-        FirebaseVisionImage image;
-        try {
-            image = FirebaseVisionImage.fromFilePath(context, Uri.parse("android.resource://com.example.phonite/drawable/nice"));
-            FirebaseVisionImageLabeler labeler = FirebaseVision.getInstance()
-                    .getOnDeviceImageLabeler();
-
-            Log.d("IMGA", "in detect face");
-
-            FirebaseVisionFaceDetector detector = FirebaseVision.getInstance()
-                    .getVisionFaceDetector();
-
-            detector.detectInImage(image)
-                    .addOnSuccessListener(
-                            new OnSuccessListener<List<FirebaseVisionFace>>() {
-                                @Override
-                                public void onSuccess(List<FirebaseVisionFace> faces) {
-                                    Log.d("IMGA", "YAY");
-                                    // Task completed successfully
-                                    for (FirebaseVisionFace face : faces) {
-                                        Rect bounds = face.getBoundingBox();
-                                        float rotY = face.getHeadEulerAngleY();  // Head is rotated to the right rotY degrees
-                                        float rotZ = face.getHeadEulerAngleZ();  // Head is tilted sideways rotZ degrees
-
-                                        // If landmark detection was enabled (mouth, ears, eyes, cheeks, and
-                                        // nose available):
-                                        FirebaseVisionFaceLandmark leftEar = face.getLandmark(FirebaseVisionFaceLandmark.LEFT_EAR);
-                                        if (leftEar != null) {
-                                            FirebaseVisionPoint leftEarPos = leftEar.getPosition();
-                                            Log.d("LEFT EAR", leftEarPos.toString());
-                                        }
-
-                                        // If contour detection was enabled:
-                                        List<FirebaseVisionPoint> leftEyeContour =
-                                                face.getContour(FirebaseVisionFaceContour.LEFT_EYE).getPoints();
-                                        List<FirebaseVisionPoint> upperLipBottomContour =
-                                                face.getContour(FirebaseVisionFaceContour.UPPER_LIP_BOTTOM).getPoints();
-
-                                        // If classification was enabled:
-                                        if (face.getSmilingProbability() != FirebaseVisionFace.UNCOMPUTED_PROBABILITY) {
-                                            float smileProb = face.getSmilingProbability();
-                                            Log.d("SMILE PROB", String.valueOf(smileProb));
-                                        }
-                                        if (face.getRightEyeOpenProbability() != FirebaseVisionFace.UNCOMPUTED_PROBABILITY) {
-                                            float rightEyeOpenProb = face.getRightEyeOpenProbability();
-                                            Log.d("RIGHT EYE OPEN PROB", String.valueOf(rightEyeOpenProb));
-                                        }
-
-                                        // If face tracking was enabled:
-                                        if (face.getTrackingId() != FirebaseVisionFace.INVALID_ID) {
-                                            int id = face.getTrackingId();
-                                        }
-                                    }
-                                }
-                            })
-                    .addOnFailureListener(
-                            new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Log.d("IMGA", "NAY");
-                                    // Task failed with an exception
-                                    // ...
-                                }
-                            });
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
 
 }

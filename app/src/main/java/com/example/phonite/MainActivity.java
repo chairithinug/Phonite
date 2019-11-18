@@ -10,7 +10,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
@@ -44,36 +43,31 @@ public class MainActivity extends AppCompatActivity {
     private TextView hit;
     private SensorManager sensorManager;
     private Sensor sensor;
+    private FireRunnable fireRunnable;
+    private MarkMedia hitSound;
+    private MarkMedia missSound;
+    private  ImageView blood_img;
+    private RunMeOnHit runMeOnHit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        MarkMedia mm = new MarkMedia(getApplicationContext());
-        ImageView blood_img = (ImageView) findViewById(R.id.blood);
+        hitSound = new MarkMedia(getApplicationContext());
+        missSound = new MarkMedia(getApplicationContext());
+        hitSound.setSound(R.raw.hitmarker);
+        missSound.setSound(R.raw.laser);
+        blood_img = (ImageView) findViewById(R.id.blood);
         btnFire = (Button) findViewById(R.id.btnFire);
+        fireRunnable = new FireRunnable();
+        runMeOnHit = new RunMeOnHit();
 
         btnFire.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "Camera click");
                 try {
-                    CameraStreamer.buttonConnector.setAnalyzeFlag(true);
-                    CameraStreamer.startTorch();
-                    if (ImageAnalyzer.FaceDetected) {
-                        bloodSplatter(blood_img);
-                        mm.setSound(R.raw.hitmarker);
-                        mm.playSound();
-                        ImageAnalyzer.FaceDetected = false;
-                    } else {
-                        mm.setSound(R.raw.laser);
-                        mm.playSound();
-                    }
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                    }
-                    CameraStreamer.startTorch();
+                    new Thread(fireRunnable).start();
                 } catch (Exception e) {
                 }
                 btnFire.cancelPendingInputEvents();
@@ -84,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (allPermissionsGranted()) {
             Log.d(TAG, "STARTING CAMERA!!!!!!");
-            CameraStreamer.startCamera(this, viewFinder); //start camera if permission has been granted by user
+            CameraStreamer.startCamera(this, viewFinder, runMeOnHit); //start camera if permission has been granted by user
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
         }
@@ -99,7 +93,8 @@ public class MainActivity extends AppCompatActivity {
         sensorManager.registerListener(lightListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
-    private void bloodSplatter(ImageView blood_img) {
+    private void bloodSplatter(ImageView blood_img)
+    {
         blood_img.setVisibility(View.VISIBLE);
         Animation fadeOut = new AlphaAnimation(1, 0);
         fadeOut.setInterpolator(new AccelerateInterpolator());
@@ -130,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
         // 10 number comes from here https://codelabs.developers.google.com/codelabs/camerax-getting-started/#4
         if (requestCode == 10) {
             if (allPermissionsGranted()) {
-                CameraStreamer.startCamera(this, viewFinder);
+                CameraStreamer.startCamera(this, viewFinder, runMeOnHit);
                 Log.d(TAG, "WE GET PERMISSIONS GRANTED");
             } else {
                 Toast.makeText(this,
@@ -188,5 +183,31 @@ public class MainActivity extends AppCompatActivity {
         public void onAccuracyChanged(Sensor sensor, int acc) {
         }
     };
+
+    public class FireRunnable implements Runnable{
+
+        // Thread.sleep(100);
+
+        @Override
+        public void run() {
+            Log.d("HITS", "Inside FireRunnable");
+
+            CameraStreamer.startTorch(); // start torch
+            CameraStreamer.buttonConnector.setAnalyzeFlag();
+            CameraStreamer.startTorch(); // stops torch
+            missSound.playSound();
+
+        }
+    }
+
+
+    public class RunMeOnHit implements Runnable{
+        @Override
+        public void run() {
+            // IF YOU COMMENT ME IN THE SOUND WILL FLIP FLOP IN BETWEEN THE TWO
+//            hitSound.playSound();
+            bloodSplatter(blood_img);
+        }
+    }
 
 }
