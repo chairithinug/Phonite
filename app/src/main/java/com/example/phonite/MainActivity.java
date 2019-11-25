@@ -192,9 +192,9 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             Log.d("HITS", "Inside FireRunnable");
 
-            CameraStreamer.startTorch(); // start torch
+            //CameraStreamer.startTorch(); // start torch
             CameraStreamer.buttonConnector.setAnalyzeFlag();
-            CameraStreamer.startTorch(); // stops torch
+            //CameraStreamer.startTorch(); // stops torch
             missSound.playSound();
 
         }
