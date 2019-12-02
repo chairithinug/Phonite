@@ -50,6 +50,12 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
     public static RequestQueue queue;
     private boolean scanning = false;
 
+    public static void setUsername(String un) {
+        username = un;
+    }
+
+    private static String username;
+
 
     public ImageAnalyzer(Runnable doThisOnHit) {
             this.doThisOnHit = doThisOnHit;
@@ -273,7 +279,7 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
     private void postRatio(String ratios) {
         String ApiURL = "https://kappa.bucky-mobile.com/ratio";
         Map<String,String> params = new HashMap<String,String>();
-        params.put("usernames","DoodleChaos");
+        params.put("usernames",username);
         params.put("ratios", ratios);
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
                 (Request.Method.POST, ApiURL, new JSONObject(params), new Response.Listener<JSONObject>() {

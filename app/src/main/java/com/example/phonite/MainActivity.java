@@ -8,6 +8,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.Image;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,6 +18,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
     private int scanCount = 0;
     public ImageView crossHair;
 
+    private EditText editUsername;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
         btnFire.setText("Scan");
         crossHair = (ImageView) findViewById(R.id.crosshair);
         crossHair.setVisibility(View.INVISIBLE);
+        editUsername = findViewById(R.id.editUsername);
 
         btnFire.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     btnFire.cancelPendingInputEvents();
                 } else {
+                    ImageAnalyzer.setUsername(editUsername.getText().toString());
                     try {
                         new Thread(scanRunnable).start();
                     } catch (Exception e) {

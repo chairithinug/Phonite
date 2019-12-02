@@ -82,7 +82,7 @@
         app:srcCompat="@drawable/blood" />
 
     <EditText
-        android:id="@+id/editText"
+        android:id="@+id/editUsername"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="39dp"
