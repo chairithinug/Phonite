@@ -44,10 +44,14 @@ public class MainActivity extends AppCompatActivity {
     private SensorManager sensorManager;
     private Sensor sensor;
     private FireRunnable fireRunnable;
+    private ScanRunnable scanRunnable;
     private MarkMedia hitSound;
     private MarkMedia missSound;
-    private  ImageView blood_img;
+    private ImageView blood_img;
     private RunMeOnHit runMeOnHit;
+    private static Context appContext;
+    private int scanCount = 0;
+    public ImageView crossHair;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,17 +64,37 @@ public class MainActivity extends AppCompatActivity {
         blood_img = (ImageView) findViewById(R.id.blood);
         btnFire = (Button) findViewById(R.id.btnFire);
         fireRunnable = new FireRunnable();
+        scanRunnable = new ScanRunnable();
         runMeOnHit = new RunMeOnHit();
+        appContext = getApplicationContext();
+        btnFire.setText("Scan");
+        crossHair = (ImageView) findViewById(R.id.crosshair);
+        crossHair.setVisibility(View.INVISIBLE);
 
         btnFire.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "Camera click");
-                try {
-                    new Thread(fireRunnable).start();
-                } catch (Exception e) {
+
+                if (scanCount > 2) {
+
+                    Log.d(TAG, "Camera click");
+                    try {
+                        new Thread(fireRunnable).start();
+                    } catch (Exception e) {
+                    }
+                    btnFire.cancelPendingInputEvents();
+                } else {
+                    try {
+                        new Thread(scanRunnable).start();
+                    } catch (Exception e) {
+                    }
+                    scanCount++;
+                    if (scanCount > 2) {
+                        btnFire.setText("FIRE");
+                        crossHair.setVisibility(View.VISIBLE);
+                    }
                 }
-                btnFire.cancelPendingInputEvents();
+
             }
         });
 
@@ -93,21 +117,22 @@ public class MainActivity extends AppCompatActivity {
         sensorManager.registerListener(lightListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
-    private void bloodSplatter(ImageView blood_img)
-    {
+    private void bloodSplatter(ImageView blood_img) {
         blood_img.setVisibility(View.VISIBLE);
         Animation fadeOut = new AlphaAnimation(1, 0);
         fadeOut.setInterpolator(new AccelerateInterpolator());
         fadeOut.setDuration(2000);
 
-        fadeOut.setAnimationListener(new Animation.AnimationListener()
-        {
-            public void onAnimationEnd(Animation animation)
-            {
+        fadeOut.setAnimationListener(new Animation.AnimationListener() {
+            public void onAnimationEnd(Animation animation) {
                 blood_img.setVisibility(View.GONE);
             }
-            public void onAnimationRepeat(Animation animation) {}
-            public void onAnimationStart(Animation animation) {}
+
+            public void onAnimationRepeat(Animation animation) {
+            }
+
+            public void onAnimationStart(Animation animation) {
+            }
         });
 
         blood_img.startAnimation(fadeOut);
@@ -184,30 +209,39 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    public class FireRunnable implements Runnable{
 
-        // Thread.sleep(100);
-
+    public class FireRunnable implements Runnable {
         @Override
         public void run() {
             Log.d("HITS", "Inside FireRunnable");
-
             //CameraStreamer.startTorch(); // start torch
-            CameraStreamer.buttonConnector.setAnalyzeFlag();
+            final boolean NOT_SCANNING = false;
+            CameraStreamer.buttonConnector.setAnalyzeFlag(NOT_SCANNING);
             //CameraStreamer.startTorch(); // stops torch
             missSound.playSound();
-
         }
     }
 
+    public class ScanRunnable implements Runnable {
+        @Override
+        public void run() {
+            final boolean SCANNING = true;
+            CameraStreamer.buttonConnector.setAnalyzeFlag(SCANNING);
+            missSound.playSound();
+        }
+    }
 
-    public class RunMeOnHit implements Runnable{
+    public class RunMeOnHit implements Runnable {
         @Override
         public void run() {
             // IF YOU COMMENT ME IN THE SOUND WILL FLIP FLOP IN BETWEEN THE TWO
 //            hitSound.playSound();
             bloodSplatter(blood_img);
         }
+    }
+
+    public static Context getAppContext() {
+        return appContext;
     }
 
 }
