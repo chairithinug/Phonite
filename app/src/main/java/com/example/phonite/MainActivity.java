@@ -227,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             final boolean SCANNING = true;
             CameraStreamer.buttonConnector.setAnalyzeFlag(SCANNING);
-            missSound.playSound();
+       //     missSound.playSound();
         }
     }
 

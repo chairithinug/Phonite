@@ -52,7 +52,7 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
 
 
     public ImageAnalyzer(Runnable doThisOnHit) {
-        this.doThisOnHit = doThisOnHit;
+            this.doThisOnHit = doThisOnHit;
     }
 
     private int degreesToFirebaseRotation(int degrees) {
@@ -214,7 +214,9 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
                                             }
                                         }
                                         ratios.add(currentRatios);
-                                        postRatio(ratios.toString());
+                                        if(scanning && (ratios.size() == 3)){
+                                                postRatio(ratios.toString());
+                                        }
                                         Log.d(TAG, ratios.toString());
 
 
@@ -240,7 +242,9 @@ public class ImageAnalyzer implements ImageAnalysis.Analyzer {
 //                                        if (MARK_THRESHOLD - totalDiff > 0) {
 //                                            Log.d("RATIOS", " OH HI MARK");
 //                                        }
-                                        new Thread(doThisOnHit).run();
+                                        if(!scanning){
+                                            new Thread(doThisOnHit).run();
+                                        }
                                         break;
                                     }
                                 })
