@@ -61,6 +61,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class MainActivity extends AppCompatActivity {
 
     public final String TAG = "MainActivity";
@@ -124,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
         players.name = "players";
         //await faceClient.PersonGroup.CreateAsync(personGroupId, "My Person Group Name", recognitionModel: "recognition_02");
 
+        // Button that test the face detection and recognition
         btnDetect = (Button) findViewById(R.id.detectButton);
         btnDetect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -140,8 +148,7 @@ public class MainActivity extends AppCompatActivity {
         btnFire.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if (scanCount > 2) {
+                if (scanCount >= 5) {
 
                     Log.d(TAG, "Camera click");
                     try {
@@ -156,9 +163,14 @@ public class MainActivity extends AppCompatActivity {
                     } catch (Exception e) {
                     }
                     scanCount++;
-                    if (scanCount > 2) {
-                        btnFire.setText("FIRE");
+                    if (scanCount == 3) {
+                        //Transition to ready up stage
+                        btnFire.setText("Everybody Ready?");
+                    } else if (scanCount == 4) {
+                        //Get other players here
+                        getRatios();
                         crossHair.setVisibility(View.VISIBLE);
+                        btnFire.setText("FIRE");
                     }
                 }
 
@@ -362,6 +374,31 @@ public class MainActivity extends AppCompatActivity {
         return currentFaceId;
     }
 
-
-
+    private void getRatios() {
+        String ApiURL = "https://kappa.bucky-mobile.com/ratio";
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                (Request.Method.GET, ApiURL, null, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            JSONArray resp = (JSONArray) response.get("instances");
+                            for (int i = 0; i < resp.length(); i++) {
+                                JSONObject instance = (JSONObject) resp.get(i);
+                                String usernames = (String) instance.get("usernames");
+                                String ratios = (String) instance.get("ratios");
+                                Log.d(TAG, usernames + " " + ratios);
+                            }
+                        } catch (JSONException exception) {
+                            Log.d(TAG, "JSON EXCEPTION for request");
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d(TAG, "onErrorResponse: " + error.toString());
+                    }
+                });
+        queue = Volley.newRequestQueue(MainActivity.getAppContext());
+        queue.add(jsonObjectRequest);
+    }
 }
