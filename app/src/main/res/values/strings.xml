@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-
+    <string name="subscription_key">f6e89adaa6c34d22b3db1a42ae7278d9</string>
+    <string name="endpoint">https://centralus.api.cognitive.microsoft.com/face/v1.0</string>
     <string name="hello">Hello World, Tuto4_BadprogTutorialPlayingSoundsActivity!</string>
     <string name="stringHello">Fire Lazor</string>
     <string name="stringGoodbye">Fire Lazor</string>

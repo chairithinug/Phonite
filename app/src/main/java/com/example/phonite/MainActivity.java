@@ -3,6 +3,7 @@ package com.example.phonite;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -10,13 +11,17 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.Image;
 import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.TextureView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -28,10 +33,39 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import com.microsoft.projectoxford.face.FaceServiceClient;
+import com.microsoft.projectoxford.face.FaceServiceRestClient;
+import com.microsoft.projectoxford.face.contract.Face;
+import com.microsoft.projectoxford.face.contract.IdentifyResult;
+import com.microsoft.projectoxford.face.contract.PersonGroup;
+import com.microsoft.projectoxford.face.contract.VerifyResult;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 public class MainActivity extends AppCompatActivity {
 
     public final String TAG = "MainActivity";
     public Button btnFire;
+    public Button btnDetect;
     public TextureView viewFinder;
     private MediaPlayer mp = null;
     private String hello = "Hello!";
@@ -54,8 +88,15 @@ public class MainActivity extends AppCompatActivity {
     private static Context appContext;
     private int scanCount = 0;
     public ImageView crossHair;
+    private FaceServiceClient sFaceServiceClient;
+    public PersonGroup players;
 
     private EditText editUsername;
+    private RequestQueue queue;
+
+    // The image selected to detect.
+    private Bitmap mBitmap;
+    private String currentFaceId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +116,26 @@ public class MainActivity extends AppCompatActivity {
         crossHair = (ImageView) findViewById(R.id.crosshair);
         crossHair.setVisibility(View.INVISIBLE);
         editUsername = findViewById(R.id.editUsername);
+        sFaceServiceClient = new FaceServiceRestClient(getString(R.string.endpoint), getString(R.string.subscription_key));
+
+        // Create an empty PersonGroup with "recognition_02" model
+        String personGroupId = "mypersongroupid";
+        players = new PersonGroup();
+        players.name = "players";
+        //await faceClient.PersonGroup.CreateAsync(personGroupId, "My Person Group Name", recognitionModel: "recognition_02");
+
+        btnDetect = (Button) findViewById(R.id.detectButton);
+        btnDetect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "Detect click");
+                try {
+                    detect("https://scontent-ort2-2.xx.fbcdn.net/v/t1.0-9/55575596_2441911285820226_8003582422639706112_o.jpg?_nc_cat=109&_nc_ohc=-1JvrcEswLMAQkKw8PkfKu6CfVc5skrJIi2f97juSiNEYXMH3Rm4gh7fA&_nc_ht=scontent-ort2-2.xx&oh=20cbb6046643d8ab795f622da77e6641&oe=5E8276BB");
+                } catch (Exception e) {
+                }
+
+            }
+        });
 
         btnFire.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -233,7 +294,7 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             final boolean SCANNING = true;
             CameraStreamer.buttonConnector.setAnalyzeFlag(SCANNING);
-       //     missSound.playSound();
+            //     missSound.playSound();
         }
     }
 
@@ -249,5 +310,58 @@ public class MainActivity extends AppCompatActivity {
     public static Context getAppContext() {
         return appContext;
     }
+
+    /* Face Recognition Stuff */
+
+    // PersonGroup id: phonite_gang
+    // sub key1: f6e89adaa6c34d22b3db1a42ae7278d9
+
+    // Alex person id:
+//    "personId": "db583e27-7b91-4550-b894-ed0713cef004"
+//    "persistedFaceId": "9f375bcc-baff-47d6-8c4c-7a35dc86020a"
+//    "persistedFaceId": "f1c34521-1d73-4586-89a0-f71c29b13f52"
+//     Tested face id:      1bf28436-41c1-464f-bc8c-d24fc3e40d02
+
+
+    // Returns a face id
+    private String detect(String url) {
+        String ApiURL = "https://centralus.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&recognitionModel=recognition_02&returnRecognitionModel=false&detectionModel=detection_02";
+        Map<String, String> params = new HashMap<>();
+        params.put("url", url);
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, ApiURL, new JSONObject(params), new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    Log.d("DETECT RESP bajangle", response.toString());
+                    currentFaceId = response.getString("faceId");
+                } catch (Exception exception) {
+                    Log.d(TAG, "JSON EXCEPTION for request");
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, "onErrorResponse: " + error.toString());
+            }
+        }) {
+            /**
+             * Passing some request headers
+             */
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<String, String>();
+                headers.put("Ocp-Apim-Subscription-Key", "f6e89adaa6c34d22b3db1a42ae7278d9");
+                return headers;
+            }
+
+        };
+        queue = Volley.newRequestQueue(MainActivity.getAppContext());
+        queue.add(jsonObjectRequest);
+
+        return currentFaceId;
+    }
+
+
 
 }
