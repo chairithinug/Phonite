@@ -38,8 +38,10 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.gson.JsonArray;
 import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.microsoft.projectoxford.face.FaceServiceRestClient;
 import com.microsoft.projectoxford.face.contract.Face;
@@ -334,19 +336,19 @@ public class MainActivity extends AppCompatActivity {
 //    "persistedFaceId": "f1c34521-1d73-4586-89a0-f71c29b13f52"
 //     Tested face id:      1bf28436-41c1-464f-bc8c-d24fc3e40d02
 
-
     // Returns a face id
     private String detect(String url) {
         String ApiURL = "https://centralus.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&recognitionModel=recognition_02&returnRecognitionModel=false&detectionModel=detection_02";
         Map<String, String> params = new HashMap<>();
         params.put("url", url);
 
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, ApiURL, new JSONObject(params), new Response.Listener<JSONObject>() {
+
+        CustomJsonRequest jsonObjectRequest = new CustomJsonRequest(Request.Method.POST, ApiURL, new JSONObject(params), new Response.Listener<JSONArray>() {
             @Override
-            public void onResponse(JSONObject response) {
+            public void onResponse(JSONArray response) {
                 try {
                     Log.d("DETECT RESP bajangle", response.toString());
-                    currentFaceId = response.getString("faceId");
+                    currentFaceId = response.toString();
                 } catch (Exception exception) {
                     Log.d(TAG, "JSON EXCEPTION for request");
                 }
@@ -401,4 +403,5 @@ public class MainActivity extends AppCompatActivity {
         queue = Volley.newRequestQueue(MainActivity.getAppContext());
         queue.add(jsonObjectRequest);
     }
+
 }
