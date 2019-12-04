@@ -28,6 +28,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class MainActivity extends AppCompatActivity {
 
     public final String TAG = "MainActivity";
@@ -79,8 +94,9 @@ public class MainActivity extends AppCompatActivity {
         btnFire.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ID();
 
-                if (scanCount > 2) {
+                if (scanCount >= 5) {
 
                     Log.d(TAG, "Camera click");
                     try {
@@ -95,9 +111,14 @@ public class MainActivity extends AppCompatActivity {
                     } catch (Exception e) {
                     }
                     scanCount++;
-                    if (scanCount > 2) {
-                        btnFire.setText("FIRE");
+                    if (scanCount == 3) {
+                        //Transition to ready up stage
+                        btnFire.setText("Everybody Ready?");
+                    } else if (scanCount == 4) {
+                        //Get other players here
+                        getRatios();
                         crossHair.setVisibility(View.VISIBLE);
+                        btnFire.setText("FIRE");
                     }
                 }
 
@@ -233,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             final boolean SCANNING = true;
             CameraStreamer.buttonConnector.setAnalyzeFlag(SCANNING);
-       //     missSound.playSound();
+            //     missSound.playSound();
         }
     }
 
@@ -250,4 +271,65 @@ public class MainActivity extends AppCompatActivity {
         return appContext;
     }
 
+    private RequestQueue queue;
+
+    private void getRatios() {
+        String ApiURL = "https://kappa.bucky-mobile.com/ratio";
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                (Request.Method.GET, ApiURL, null, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            JSONArray resp = (JSONArray) response.get("instances");
+                            for (int i = 0; i < resp.length(); i++) {
+                                JSONObject instance = (JSONObject) resp.get(i);
+                                String usernames = (String) instance.get("usernames");
+                                String ratios = (String) instance.get("ratios");
+                                Log.d(TAG, usernames + " " + ratios);
+                            }
+                        } catch (JSONException exception) {
+                            Log.d(TAG, "JSON EXCEPTION for request");
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d(TAG, "onErrorResponse: " + error.toString());
+                    }
+                });
+        queue = Volley.newRequestQueue(MainActivity.getAppContext());
+        queue.add(jsonObjectRequest);
+    }
+
+    private void ID() {
+        String ApiURL = "https://centralus.api.cognitive.microsoft.com/face/v1.0/persongroups/phonite_gang?returnRecodgnitionModel=false";
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                (Request.Method.GET, ApiURL, null, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            Log.d(TAG, response.get("name").toString());
+                        } catch (JSONException exception) {
+                            Log.d(TAG, "JSON EXCEPTION for request");
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d(TAG, "onErrorResponse: " + error.toString());
+                    }
+                }) {
+            /**
+             * Passing some request headers
+             */
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<String, String>();
+                headers.put("Ocp-Apim-Subscription-Key", "f6e89adaa6c34d22b3db1a42ae7278d9");
+                return headers;
+            }
+        };
+        queue = Volley.newRequestQueue(MainActivity.getAppContext());
+        queue.add(jsonObjectRequest);
+    }
 }
