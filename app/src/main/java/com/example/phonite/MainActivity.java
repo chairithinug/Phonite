@@ -4,7 +4,11 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.ImageFormat;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -41,15 +45,21 @@ import com.android.volley.toolbox.Volley;
 import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.microsoft.projectoxford.face.FaceServiceRestClient;
 import com.microsoft.projectoxford.face.contract.PersonGroup;
+//import com.squareup.okhttp.OkHttpClient;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
 import org.json.JSONArray;
+
+import okhttp3.OkHttpClient;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -87,6 +97,73 @@ public class MainActivity extends AppCompatActivity {
     // The image selected to detect.
     private Bitmap mBitmap;
     private String currentFaceId;
+
+    private void imgurAPI(ImageProxy image){
+        String ApiURL = "https://api.imgur.com/3/upload";
+      //  Map<String, String> params = new HashMap<>();
+        //params.put("url", url);
+
+
+        CustomJsonRequest jsonObjectRequest = new CustomJsonRequest(Request.Method.POST, ApiURL, new JSONObject(), new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                try {
+                    Log.d("bajangle", response.toString());
+                    currentFaceId = response.toString();
+                } catch (Exception exception) {
+                    Log.d(TAG, "JSON EXCEPTION for request");
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, "onErrorResponse: " + error.toString());
+            }
+        }) {
+            /**
+             * Passing some request headers
+             */
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<String, String>();
+                headers.put("Authorization", "Client-ID c8611788cf08f60");
+                return headers;
+            }
+
+            @Override
+            public byte[] getBody() {
+                ByteBuffer yBuff = image.getPlanes()[0].getBuffer();
+                
+//                ByteBuffer uBuff = image.getPlanes()[1].getBuffer();
+//                ByteBuffer vBuff = image.getPlanes()[2].getBuffer();
+
+                int ySize = yBuff.remaining();
+//                int uSize = uBuff.remaining();
+//                int vSize = vBuff.remaining();
+
+                byte[] nv21 = new byte[ySize /*+ uSize + vSize*/];
+
+                //U and V are swapped
+                yBuff.get(nv21, 0, ySize);
+//                vBuff.get(nv21, ySize, vSize);
+//                uBuff.get(nv21, ySize + vSize, uSize);
+
+
+     //    val yuvImage = YuvImage(nv21, ImageFormat.NV21, this.width, this.height, null)
+                YuvImage yuvImage = new YuvImage(nv21, ImageFormat.NV21, image.getWidth(), image.getHeight(), null);
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                yuvImage.compressToJpeg(new Rect(49, 7, 273, 231), 74, out);
+                byte[] imageBytes =  out.toByteArray();
+                image.close();
+                return imageBytes;
+//                return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+            }
+
+        };
+        queue = Volley.newRequestQueue(MainActivity.getAppContext());
+        queue.add(jsonObjectRequest);
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,6 +224,8 @@ public class MainActivity extends AppCompatActivity {
 
         sensorManager.registerListener(lightListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
 
+
+
         btnFire.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -161,8 +240,9 @@ public class MainActivity extends AppCompatActivity {
                     public void onCaptureSuccess(ImageProxy image, int rotationDegrees) {
 
                         //Start Imgur API
+                        imgurAPI(image);
 
-                        image.close();
+
                     }
                 });
                 /*
