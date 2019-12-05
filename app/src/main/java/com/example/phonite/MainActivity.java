@@ -9,19 +9,14 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.media.Image;
 import android.media.MediaPlayer;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.TextureView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -30,6 +25,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.core.FlashMode;
+import androidx.camera.core.ImageCapture;
+import androidx.camera.core.ImageProxy;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -38,37 +36,20 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.gson.JsonArray;
 import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.microsoft.projectoxford.face.FaceServiceRestClient;
-import com.microsoft.projectoxford.face.contract.Face;
-import com.microsoft.projectoxford.face.contract.IdentifyResult;
 import com.microsoft.projectoxford.face.contract.PersonGroup;
-import com.microsoft.projectoxford.face.contract.VerifyResult;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.concurrent.Executor;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -99,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
     public ImageView crossHair;
     private FaceServiceClient sFaceServiceClient;
     public PersonGroup players;
-
+    private ImageCapture imgCap;
     private EditText editUsername;
     private RequestQueue queue;
 
@@ -147,9 +128,44 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+
+        viewFinder = findViewById(R.id.view_finder);
+
+        while(!allPermissionsGranted()) {
+            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
+        }
+        imgCap = OurCamera.startCamera(this, viewFinder, runMeOnHit); //start camera if permission has been granted by user
+        imgCap.setFlashMode(FlashMode.ON);
+
+        sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
+        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+        textLight = findViewById(R.id.textLight);
+        textLight.setTextColor(Color.WHITE);
+        hit = findViewById(R.id.hit);
+        hit.setText("");
+
+        sensorManager.registerListener(lightListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+
         btnFire.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Executor ex = new Executor(){
+                    @Override
+                    public void execute(Runnable runnable){
+                        runnable.run();
+                    }
+                };
+                imgCap.takePicture(ex, new ImageCapture.OnImageCapturedListener() {
+                    @Override
+                    public void onCaptureSuccess(ImageProxy image, int rotationDegrees) {
+
+                        //Start Imgur API
+
+                        image.close();
+                    }
+                });
+                /*
                 if (scanCount >= 5) {
 
                     Log.d(TAG, "Camera click");
@@ -175,27 +191,10 @@ public class MainActivity extends AppCompatActivity {
                         btnFire.setText("FIRE");
                     }
                 }
-
+                  */
             }
         });
 
-        viewFinder = findViewById(R.id.view_finder);
-
-        if (allPermissionsGranted()) {
-            Log.d(TAG, "STARTING CAMERA!!!!!!");
-            CameraStreamer.startCamera(this, viewFinder, runMeOnHit); //start camera if permission has been granted by user
-        } else {
-            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
-        }
-
-        sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
-        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-        textLight = findViewById(R.id.textLight);
-        textLight.setTextColor(Color.WHITE);
-        hit = findViewById(R.id.hit);
-        hit.setText("");
-
-        sensorManager.registerListener(lightListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     private void bloodSplatter(ImageView blood_img) {
@@ -231,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
         // 10 number comes from here https://codelabs.developers.google.com/codelabs/camerax-getting-started/#4
         if (requestCode == 10) {
             if (allPermissionsGranted()) {
-                CameraStreamer.startCamera(this, viewFinder, runMeOnHit);
+                 OurCamera.startCamera(this, viewFinder, runMeOnHit);
                 Log.d(TAG, "WE GET PERMISSIONS GRANTED");
             } else {
                 Toast.makeText(this,
@@ -295,10 +294,10 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             Log.d("HITS", "Inside FireRunnable");
-            //CameraStreamer.startTorch(); // start torch
+            //OurCamera.startTorch(); // start torch
             final boolean NOT_SCANNING = false;
-            CameraStreamer.buttonConnector.setAnalyzeFlag(NOT_SCANNING);
-            //CameraStreamer.startTorch(); // stops torch
+            OurCamera.buttonConnector.setAnalyzeFlag(NOT_SCANNING);
+            //OurCamera.startTorch(); // stops torch
             missSound.playSound();
         }
     }
@@ -307,7 +306,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             final boolean SCANNING = true;
-            CameraStreamer.buttonConnector.setAnalyzeFlag(SCANNING);
+            OurCamera.buttonConnector.setAnalyzeFlag(SCANNING);
             //     missSound.playSound();
         }
     }

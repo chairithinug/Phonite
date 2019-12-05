@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import androidx.camera.core.CameraX;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageAnalysisConfig;
+import androidx.camera.core.ImageCapture;
+import androidx.camera.core.ImageCaptureConfig;
 import androidx.camera.core.Preview;
 import androidx.camera.core.PreviewConfig;
 import androidx.lifecycle.LifecycleOwner;
@@ -16,17 +18,17 @@ import androidx.lifecycle.LifecycleOwner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class CameraStreamer implements Runnable {
+public class OurCamera implements Runnable {
 
-    public static final String TAG = "CameraStreamer";
+    public static final String TAG = "OurCamera";
     private static Context context;
     private static ExecutorService executor = Executors.newSingleThreadExecutor();
     private static boolean cameraStarted;
     public static Preview preview;
     public static ImageAnalyzer buttonConnector;
 
-    public CameraStreamer(Context context) {
-        CameraStreamer.context = context;
+    public OurCamera(Context context) {
+        OurCamera.context = context;
         cameraStarted = false;
     }
 
@@ -34,7 +36,7 @@ public class CameraStreamer implements Runnable {
         preview.enableTorch(!preview.isTorchOn());
     }
 
-    public static void startCamera(LifecycleOwner lifecycleOwner, TextureView viewFinder, Runnable runThisOnHit) {
+    public static ImageCapture startCamera(LifecycleOwner lifecycleOwner, TextureView viewFinder, Runnable runThisOnHit) {
         cameraStarted = true;
 
         Log.d(TAG, "in start Camera");
@@ -47,7 +49,7 @@ public class CameraStreamer implements Runnable {
 
         // Every time the viewfinder is updated, recompute layout
         preview.setOnPreviewOutputUpdateListener(output -> {
-            Log.d("CameraStreamer", "onUpdated is being called!!! ---------------");
+            Log.d("OurCamera", "onUpdated is being called!!! ---------------");
 
             ViewGroup parent = (ViewGroup) viewFinder.getParent();
             parent.removeView(viewFinder);
@@ -56,16 +58,14 @@ public class CameraStreamer implements Runnable {
             viewFinder.setSurfaceTexture(output.getSurfaceTexture());
 
         });
-        // Setup image analysis pipeline that computes average pixel luminance
-        ImageAnalysisConfig analyzerConfig = new ImageAnalysisConfig.Builder()
-                .setTargetResolution(new Size(1280, 720))
-                .setImageReaderMode(ImageAnalysis.ImageReaderMode.ACQUIRE_LATEST_IMAGE)
-                .build();
-        ImageAnalysis imageAnalysis = new ImageAnalysis(analyzerConfig);
-//        imageAnalysis.setAnalyzer(executor, new BrightnessAnalyzer());
-        buttonConnector = new ImageAnalyzer(runThisOnHit);
-        imageAnalysis.setAnalyzer(executor, buttonConnector);
-        CameraX.bindToLifecycle(lifecycleOwner, imageAnalysis, preview); //, preview, imageCapture)
+        ImageCaptureConfig config = new ImageCaptureConfig.Builder().build();
+
+        ImageCapture imageCapture = new ImageCapture(config);
+
+
+        CameraX.bindToLifecycle(lifecycleOwner, imageCapture, preview); //, preview, imageCapture)
+
+        return imageCapture;
     }
 
     public ImageAnalyzer getImageAnalyzer() {
