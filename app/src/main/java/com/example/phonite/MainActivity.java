@@ -132,30 +132,32 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public byte[] getBody() {
-                ByteBuffer yBuff = image.getPlanes()[0].getBuffer();
-                
+                ByteBuffer bb = image.getPlanes()[0].getBuffer();
+                byte[] buf = new byte[bb.remaining()];
+                bb.get(buf);
+
 //                ByteBuffer uBuff = image.getPlanes()[1].getBuffer();
 //                ByteBuffer vBuff = image.getPlanes()[2].getBuffer();
 
-                int ySize = yBuff.remaining();
+//                int ySize = yBuff.remaining();
 //                int uSize = uBuff.remaining();
 //                int vSize = vBuff.remaining();
 
-                byte[] nv21 = new byte[ySize /*+ uSize + vSize*/];
+  //              byte[] nv21 = new byte[ySize /*+ uSize + vSize*/];
 
                 //U and V are swapped
-                yBuff.get(nv21, 0, ySize);
+    //            yBuff.get(nv21, 0, ySize);
 //                vBuff.get(nv21, ySize, vSize);
 //                uBuff.get(nv21, ySize + vSize, uSize);
 
 
      //    val yuvImage = YuvImage(nv21, ImageFormat.NV21, this.width, this.height, null)
-                YuvImage yuvImage = new YuvImage(nv21, ImageFormat.NV21, image.getWidth(), image.getHeight(), null);
+       //         YuvImage yuvImage = new YuvImage(nv21, ImageFormat.NV21, image.getWidth(), image.getHeight(), null);
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
-                yuvImage.compressToJpeg(new Rect(49, 7, 273, 231), 74, out);
+         //       yuvImage.compressToJpeg(new Rect(49, 7, 273, 231), 74, out);
                 byte[] imageBytes =  out.toByteArray();
                 image.close();
-                return imageBytes;
+                return buf;
 //                return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
             }
 
