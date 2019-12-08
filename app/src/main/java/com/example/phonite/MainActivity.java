@@ -9,19 +9,14 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.media.Image;
 import android.media.MediaPlayer;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.TextureView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -41,7 +36,10 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.microsoft.projectoxford.face.FaceServiceRestClient;
 import com.microsoft.projectoxford.face.contract.Face;
@@ -53,6 +51,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DecimalFormat;
@@ -140,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Log.d(TAG, "Detect click");
                 try {
-                    detect("https://scontent-ort2-2.xx.fbcdn.net/v/t1.0-9/55575596_2441911285820226_8003582422639706112_o.jpg?_nc_cat=109&_nc_ohc=-1JvrcEswLMAQkKw8PkfKu6CfVc5skrJIi2f97juSiNEYXMH3Rm4gh7fA&_nc_ht=scontent-ort2-2.xx&oh=20cbb6046643d8ab795f622da77e6641&oe=5E8276BB");
+                    currentFaceId = detect("https://scontent-ort2-2.xx.fbcdn.net/v/t1.0-9/55575596_2441911285820226_8003582422639706112_o.jpg?_nc_cat=109&_nc_ohc=-1JvrcEswLMAQkKw8PkfKu6CfVc5skrJIi2f97juSiNEYXMH3Rm4gh7fA&_nc_ht=scontent-ort2-2.xx&oh=20cbb6046643d8ab795f622da77e6641&oe=5E8276BB");
                 } catch (Exception e) {
                 }
 
@@ -325,6 +324,34 @@ public class MainActivity extends AppCompatActivity {
         return appContext;
     }
 
+    private void getRatios() {
+        String ApiURL = "https://kappa.bucky-mobile.com/ratio";
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                (Request.Method.GET, ApiURL, null, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            JSONArray resp = (JSONArray) response.get("instances");
+                            for (int i = 0; i < resp.length(); i++) {
+                                JSONObject instance = (JSONObject) resp.get(i);
+                                String usernames = (String) instance.get("usernames");
+                                String ratios = (String) instance.get("ratios");
+                                Log.d(TAG, usernames + " " + ratios);
+                            }
+                        } catch (JSONException exception) {
+                            Log.d(TAG, "JSON EXCEPTION for request");
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d(TAG, "onErrorResponse: " + error.toString());
+                    }
+                });
+        queue = Volley.newRequestQueue(MainActivity.getAppContext());
+        queue.add(jsonObjectRequest);
+    }
+
     /* Face Recognition Stuff */
 
     // PersonGroup id: phonite_gang
@@ -347,8 +374,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(JSONArray response) {
                 try {
-                    Log.d("DETECT RESP bajangle", response.toString());
-                    currentFaceId = response.toString();
+                    Log.d("DETECT RESP bajangle", response.get(0).toString());
+                    JSONObject obj = response.getJSONObject(0);
+
+                    currentFaceId = obj.getString("faceId");
+                    identify(obj.getString("faceId"));
+
                 } catch (Exception exception) {
                     Log.d(TAG, "JSON EXCEPTION for request");
                 }
@@ -376,30 +407,101 @@ public class MainActivity extends AppCompatActivity {
         return currentFaceId;
     }
 
-    private void getRatios() {
-        String ApiURL = "https://kappa.bucky-mobile.com/ratio";
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (Request.Method.GET, ApiURL, null, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            JSONArray resp = (JSONArray) response.get("instances");
-                            for (int i = 0; i < resp.length(); i++) {
-                                JSONObject instance = (JSONObject) resp.get(i);
-                                String usernames = (String) instance.get("usernames");
-                                String ratios = (String) instance.get("ratios");
-                                Log.d(TAG, usernames + " " + ratios);
-                            }
-                        } catch (JSONException exception) {
-                            Log.d(TAG, "JSON EXCEPTION for request");
-                        }
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d(TAG, "onErrorResponse: " + error.toString());
-                    }
-                });
+    // Returns a face id
+    private String id(String id) {
+        String ApiURL = "https://centralus.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&recognitionModel=recognition_02&returnRecognitionModel=false&detectionModel=detection_02";
+        Map<String, String> params = new HashMap<>();
+        Log.d("trying ID", id);
+        ArrayList<String> list = new ArrayList<String>();
+        list.add(id);
+        JSONArray jsArray = new JSONArray(list);
+        params.put("personGroupId", "phonite_gang");
+        params.put("faceIds", "["+id+"]");
+        params.put("maxNumOfCandidatesReturned", "1");
+        params.put("confidenceThreshold", "0.5");
+
+
+        CustomJsonRequest jsonObjectRequest = new CustomJsonRequest(Request.Method.POST, ApiURL, new JSONObject(params), new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                try {
+                    Log.d("IDENTIFY! RESP bajangle", response.toString());
+                    //JSONObject obj = response.getJSONObject(0);
+                    //Log.d()
+                    //currentFaceId = obj.getString("faceId");
+                    //identify(obj.getString("faceId"));
+
+                } catch (Exception exception) {
+                    Log.d(TAG, "JSON EXCEPTION for request");
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, "onErrorResponse: " + error.toString());
+            }
+        }) {
+            /**
+             * Passing some request headers
+             */
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<String, String>();
+                headers.put("Ocp-Apim-Subscription-Key", "f6e89adaa6c34d22b3db1a42ae7278d9");
+                return headers;
+            }
+
+        };
+        queue = Volley.newRequestQueue(MainActivity.getAppContext());
+        queue.add(jsonObjectRequest);
+
+        return currentFaceId;
+    }
+
+    private void identify(String id) {
+        String ApiURL = "https://centralus.api.cognitive.microsoft.com/face/v1.0/identify";
+        JSONObject jsonBody = new JSONObject();
+        try {
+            Log.d("trying ID", id);
+            ArrayList<String> list = new ArrayList<String>();
+            list.add(id);
+            JSONArray jsArray = new JSONArray(list);
+            jsonBody.put("personGroupId", "phonite_gang");
+            jsonBody.put("faceIds", jsArray);
+            jsonBody.put("maxNumOfCandidatesReturned", 1);
+            jsonBody.put("confidenceThreshold", 0.5);
+        } catch (Exception e) {
+            Log.d(TAG, "OOPS - creating body of request");
+        }
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, ApiURL, jsonBody, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    Log.d("ID RESP bajangle", response.toString());
+                    currentFaceId = response.getString("faceId");
+                } catch (Exception exception) {
+                    Log.d(TAG, "JSON EXCEPTION for request");
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, "onErrorResponse: " + error.toString());
+            }
+        }) {
+            /**
+             * Passing some request headers
+             */
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<String, String>();
+                headers.put("Ocp-Apim-Subscription-Key", "f6e89adaa6c34d22b3db1a42ae7278d9");
+                headers.put("Content-Type", "application/json");
+                return headers;
+            }
+
+        };
         queue = Volley.newRequestQueue(MainActivity.getAppContext());
         queue.add(jsonObjectRequest);
     }
