@@ -98,15 +98,14 @@ public class MainActivity extends AppCompatActivity {
     private Bitmap mBitmap;
     private String currentFaceId;
 
-    private void imgurAPI(ImageProxy image){
+    private String imgurAPI(ImageProxy image){
         String ApiURL = "https://api.imgur.com/3/upload";
       //  Map<String, String> params = new HashMap<>();
         //params.put("url", url);
 
+        CustomJsonRequest jsonObjectRequest = new CustomJsonRequest(Request.Method.POST, ApiURL, new JSONObject(), new Response.Listener<JSONObject>() {
 
-        CustomJsonRequest jsonObjectRequest = new CustomJsonRequest(Request.Method.POST, ApiURL, new JSONObject(), new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
+            public void onResponse(JSONObject response) {
                 try {
                     Log.d("bajangle", response.toString());
                     currentFaceId = response.toString();
@@ -117,7 +116,19 @@ public class MainActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, "onErrorResponse: " + error.toString());
+             //   Log.d(TAG, "onErrorResponse: " + error.toString());
+                try{
+
+                    int frontIndex = error.getMessage().indexOf("link");
+                    int backIndex = error.getMessage().indexOf("success");
+                    //Log.d("bajangle", "lksjdflskdjf" + error.getMessage().substring(frontIndex + 5, backIndex));
+                    String link = error.getMessage().substring(frontIndex + 7, backIndex - 4);
+                    Log.d("bajangle", link);
+                    
+                }catch(Exception e){
+
+                }
+
             }
         }) {
             /**
@@ -136,23 +147,6 @@ public class MainActivity extends AppCompatActivity {
                 byte[] buf = new byte[bb.remaining()];
                 bb.get(buf);
 
-//                ByteBuffer uBuff = image.getPlanes()[1].getBuffer();
-//                ByteBuffer vBuff = image.getPlanes()[2].getBuffer();
-
-//                int ySize = yBuff.remaining();
-//                int uSize = uBuff.remaining();
-//                int vSize = vBuff.remaining();
-
-  //              byte[] nv21 = new byte[ySize /*+ uSize + vSize*/];
-
-                //U and V are swapped
-    //            yBuff.get(nv21, 0, ySize);
-//                vBuff.get(nv21, ySize, vSize);
-//                uBuff.get(nv21, ySize + vSize, uSize);
-
-
-     //    val yuvImage = YuvImage(nv21, ImageFormat.NV21, this.width, this.height, null)
-       //         YuvImage yuvImage = new YuvImage(nv21, ImageFormat.NV21, image.getWidth(), image.getHeight(), null);
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
          //       yuvImage.compressToJpeg(new Rect(49, 7, 273, 231), 74, out);
                 byte[] imageBytes =  out.toByteArray();
