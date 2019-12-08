@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
     private Bitmap mBitmap;
     private String currentFaceId;
 
-    private String imgurAPI(ImageProxy image){
+    private void imgurAPI(ImageProxy image){
         String ApiURL = "https://api.imgur.com/3/upload";
       //  Map<String, String> params = new HashMap<>();
         //params.put("url", url);
@@ -124,7 +124,8 @@ public class MainActivity extends AppCompatActivity {
                     //Log.d("bajangle", "lksjdflskdjf" + error.getMessage().substring(frontIndex + 5, backIndex));
                     String link = error.getMessage().substring(frontIndex + 7, backIndex - 4);
                     Log.d("bajangle", link);
-                    
+                    //Call Detect here with the link
+
                 }catch(Exception e){
 
                 }
