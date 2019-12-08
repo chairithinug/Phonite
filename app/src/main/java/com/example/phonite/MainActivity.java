@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void imgurAPI(ImageProxy image){
         String ApiURL = "https://api.imgur.com/3/upload";
-      //  Map<String, String> params = new HashMap<>();
+        //  Map<String, String> params = new HashMap<>();
         //params.put("url", url);
 
         CustomJsonRequest jsonObjectRequest = new CustomJsonRequest(Request.Method.POST, ApiURL, new JSONObject(), new Response.Listener<JSONObject>() {
@@ -118,7 +118,14 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("bajangle", link);
                     //Call Detect here with the link
                     try {
-                        currentFaceId = detect(link);
+                        String[] arr = link.split("/");
+//                        for(int i = 0; i < arr.length; i++)
+//                        {
+//                            Log.d("elem in arr", arr[i]);
+//                        }
+                        String ending = arr[arr.length-1];
+                        String url = "https://i.imgur.com/" + ending;
+                        currentFaceId = detect(url);
                     } catch (Exception e) {
                     }
 
@@ -441,10 +448,10 @@ public class MainActivity extends AppCompatActivity {
     // sub key1: f6e89adaa6c34d22b3db1a42ae7278d9
 
     // Alex person id:
-//    "personId": "db583e27-7b91-4550-b894-ed0713cef004"
-//    "persistedFaceId": "9f375bcc-baff-47d6-8c4c-7a35dc86020a"
-//    "persistedFaceId": "f1c34521-1d73-4586-89a0-f71c29b13f52"
-//     Tested face id:      1bf28436-41c1-464f-bc8c-d24fc3e40d02
+    //    "personId":           "db583e27-7b91-4550-b894-ed0713cef004"
+    //    "persistedFaceId":    "9f375bcc-baff-47d6-8c4c-7a35dc86020a"
+    //    "persistedFaceId":    "f1c34521-1d73-4586-89a0-f71c29b13f52"
+    //     Tested face id:      "1bf28436-41c1-464f-bc8c-d24fc3e40d02"
 
     // Returns a face id
     private String detect(String url) {
