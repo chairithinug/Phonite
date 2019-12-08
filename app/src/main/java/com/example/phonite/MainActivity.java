@@ -25,6 +25,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.core.FlashMode;
+import androidx.camera.core.ImageCapture;
+import androidx.camera.core.ImageProxy;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -33,41 +36,22 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.microsoft.projectoxford.face.FaceServiceRestClient;
-import com.microsoft.projectoxford.face.contract.Face;
-import com.microsoft.projectoxford.face.contract.IdentifyResult;
 import com.microsoft.projectoxford.face.contract.PersonGroup;
-import com.microsoft.projectoxford.face.contract.VerifyResult;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.concurrent.Executor;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -98,13 +82,90 @@ public class MainActivity extends AppCompatActivity {
     public ImageView crossHair;
     private FaceServiceClient sFaceServiceClient;
     public PersonGroup players;
-
+    private ImageCapture imgCap;
     private EditText editUsername;
     private RequestQueue queue;
 
     // The image selected to detect.
     private Bitmap mBitmap;
     private String currentFaceId;
+
+    private void imgurAPI(ImageProxy image){
+        String ApiURL = "https://api.imgur.com/3/upload";
+      //  Map<String, String> params = new HashMap<>();
+        //params.put("url", url);
+
+        CustomJsonRequest jsonObjectRequest = new CustomJsonRequest(Request.Method.POST, ApiURL, new JSONObject(), new Response.Listener<JSONObject>() {
+
+            public void onResponse(JSONObject response) {
+                try {
+                    Log.d("bajangle", response.toString());
+                    currentFaceId = response.toString();
+                } catch (Exception exception) {
+                    Log.d(TAG, "JSON EXCEPTION for request");
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+             //   Log.d(TAG, "onErrorResponse: " + error.toString());
+                try{
+
+                    int frontIndex = error.getMessage().indexOf("link");
+                    int backIndex = error.getMessage().indexOf("success");
+                    //Log.d("bajangle", "lksjdflskdjf" + error.getMessage().substring(frontIndex + 5, backIndex));
+                    String link = error.getMessage().substring(frontIndex + 7, backIndex - 4);
+                    Log.d("bajangle", link);
+                    //Call Detect here with the link
+                    try {
+                        currentFaceId = detect(link);
+                    } catch (Exception e) {
+                    }
+
+                }catch(Exception e){
+
+                }
+
+            }
+        }) {
+            /**
+             * Passing some request headers
+             */
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<String, String>();
+                headers.put("Authorization", "Client-ID c8611788cf08f60");
+                return headers;
+            }
+
+            @Override
+            public byte[] getBody() {
+                ByteBuffer bb;
+                try {
+                    bb = image.getPlanes()[0].getBuffer();
+                } catch(Exception e) {
+                    return null;
+                }
+                byte[] buf = new byte[bb.remaining()];
+                bb.get(buf);
+
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+         //       yuvImage.compressToJpeg(new Rect(49, 7, 273, 231), 74, out);
+                byte[] imageBytes =  out.toByteArray();
+                try{
+                    image.close();
+                } catch (Exception e){
+                    Log.d("bad", "failed to close image");
+                }
+                return buf;
+//                return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+            }
+
+        };
+        queue = Volley.newRequestQueue(MainActivity.getAppContext());
+        queue.add(jsonObjectRequest);
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,16 +200,55 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Log.d(TAG, "Detect click");
                 try {
-                    currentFaceId = detect("https://scontent-ort2-2.xx.fbcdn.net/v/t1.0-9/55575596_2441911285820226_8003582422639706112_o.jpg?_nc_cat=109&_nc_ohc=-1JvrcEswLMAQkKw8PkfKu6CfVc5skrJIi2f97juSiNEYXMH3Rm4gh7fA&_nc_ht=scontent-ort2-2.xx&oh=20cbb6046643d8ab795f622da77e6641&oe=5E8276BB");
+                    currentFaceId = detect("https://i.imgur.com/SFjMNiW.jpg");
+                    //currentFaceId = detect("https://scontent-ort2-2.xx.fbcdn.net/v/t1.0-9/55575596_2441911285820226_8003582422639706112_o.jpg?_nc_cat=109&_nc_ohc=-1JvrcEswLMAQkKw8PkfKu6CfVc5skrJIi2f97juSiNEYXMH3Rm4gh7fA&_nc_ht=scontent-ort2-2.xx&oh=20cbb6046643d8ab795f622da77e6641&oe=5E8276BB");
                 } catch (Exception e) {
                 }
 
             }
         });
 
+
+
+        viewFinder = findViewById(R.id.view_finder);
+
+        while(!allPermissionsGranted()) {
+            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
+        }
+        imgCap = OurCamera.startCamera(this, viewFinder, runMeOnHit); //start camera if permission has been granted by user
+        imgCap.setFlashMode(FlashMode.ON);
+
+        sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
+        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+        textLight = findViewById(R.id.textLight);
+        textLight.setTextColor(Color.WHITE);
+        hit = findViewById(R.id.hit);
+        hit.setText("");
+
+        sensorManager.registerListener(lightListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+
+
+
         btnFire.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Executor ex = new Executor(){
+                    @Override
+                    public void execute(Runnable runnable){
+                        runnable.run();
+                    }
+                };
+                imgCap.takePicture(ex, new ImageCapture.OnImageCapturedListener() {
+                    @Override
+                    public void onCaptureSuccess(ImageProxy image, int rotationDegrees) {
+
+                        //Start Imgur API
+                        imgurAPI(image);
+
+
+                    }
+                });
+                /*
                 if (scanCount >= 5) {
 
                     Log.d(TAG, "Camera click");
@@ -174,27 +274,10 @@ public class MainActivity extends AppCompatActivity {
                         btnFire.setText("FIRE");
                     }
                 }
-
+                  */
             }
         });
 
-        viewFinder = findViewById(R.id.view_finder);
-
-        if (allPermissionsGranted()) {
-            Log.d(TAG, "STARTING CAMERA!!!!!!");
-            CameraStreamer.startCamera(this, viewFinder, runMeOnHit); //start camera if permission has been granted by user
-        } else {
-            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
-        }
-
-        sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
-        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-        textLight = findViewById(R.id.textLight);
-        textLight.setTextColor(Color.WHITE);
-        hit = findViewById(R.id.hit);
-        hit.setText("");
-
-        sensorManager.registerListener(lightListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     private void bloodSplatter(ImageView blood_img) {
@@ -230,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
         // 10 number comes from here https://codelabs.developers.google.com/codelabs/camerax-getting-started/#4
         if (requestCode == 10) {
             if (allPermissionsGranted()) {
-                CameraStreamer.startCamera(this, viewFinder, runMeOnHit);
+                 OurCamera.startCamera(this, viewFinder, runMeOnHit);
                 Log.d(TAG, "WE GET PERMISSIONS GRANTED");
             } else {
                 Toast.makeText(this,
@@ -294,10 +377,10 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             Log.d("HITS", "Inside FireRunnable");
-            //CameraStreamer.startTorch(); // start torch
+            //OurCamera.startTorch(); // start torch
             final boolean NOT_SCANNING = false;
-            CameraStreamer.buttonConnector.setAnalyzeFlag(NOT_SCANNING);
-            //CameraStreamer.startTorch(); // stops torch
+            OurCamera.buttonConnector.setAnalyzeFlag(NOT_SCANNING);
+            //OurCamera.startTorch(); // stops torch
             missSound.playSound();
         }
     }
@@ -306,7 +389,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             final boolean SCANNING = true;
-            CameraStreamer.buttonConnector.setAnalyzeFlag(SCANNING);
+            OurCamera.buttonConnector.setAnalyzeFlag(SCANNING);
             //     missSound.playSound();
         }
     }
@@ -369,6 +452,7 @@ public class MainActivity extends AppCompatActivity {
         Map<String, String> params = new HashMap<>();
         params.put("url", url);
 
+        Log.d("URL: " ,url);
 
         CustomJsonRequest jsonObjectRequest = new CustomJsonRequest(Request.Method.POST, ApiURL, new JSONObject(params), new Response.Listener<JSONArray>() {
             @Override
@@ -377,8 +461,8 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("DETECT RESP bajangle", response.get(0).toString());
                     JSONObject obj = response.getJSONObject(0);
 
-                    currentFaceId = obj.getString("faceId");
-                    identify(obj.getString("faceId"));
+                    // currentFaceId = obj.getString("faceId");
+                    // identify(obj.getString("faceId"));
 
                 } catch (Exception exception) {
                     Log.d(TAG, "JSON EXCEPTION for request");
@@ -387,58 +471,7 @@ public class MainActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, "onErrorResponse: " + error.toString());
-            }
-        }) {
-            /**
-             * Passing some request headers
-             */
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                HashMap<String, String> headers = new HashMap<String, String>();
-                headers.put("Ocp-Apim-Subscription-Key", "f6e89adaa6c34d22b3db1a42ae7278d9");
-                return headers;
-            }
-
-        };
-        queue = Volley.newRequestQueue(MainActivity.getAppContext());
-        queue.add(jsonObjectRequest);
-
-        return currentFaceId;
-    }
-
-    // Returns a face id
-    private String id(String id) {
-        String ApiURL = "https://centralus.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&recognitionModel=recognition_02&returnRecognitionModel=false&detectionModel=detection_02";
-        Map<String, String> params = new HashMap<>();
-        Log.d("trying ID", id);
-        ArrayList<String> list = new ArrayList<String>();
-        list.add(id);
-        JSONArray jsArray = new JSONArray(list);
-        params.put("personGroupId", "phonite_gang");
-        params.put("faceIds", "["+id+"]");
-        params.put("maxNumOfCandidatesReturned", "1");
-        params.put("confidenceThreshold", "0.5");
-
-
-        CustomJsonRequest jsonObjectRequest = new CustomJsonRequest(Request.Method.POST, ApiURL, new JSONObject(params), new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                try {
-                    Log.d("IDENTIFY! RESP bajangle", response.toString());
-                    //JSONObject obj = response.getJSONObject(0);
-                    //Log.d()
-                    //currentFaceId = obj.getString("faceId");
-                    //identify(obj.getString("faceId"));
-
-                } catch (Exception exception) {
-                    Log.d(TAG, "JSON EXCEPTION for request");
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, "onErrorResponse: " + error.toString());
+                Log.d("BAJANGLE", error.toString());
             }
         }) {
             /**
