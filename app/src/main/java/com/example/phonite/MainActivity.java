@@ -223,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
         }
         imgCap = OurCamera.startCamera(this, viewFinder, runMeOnHit); //start camera if permission has been granted by user
-        imgCap.setFlashMode(FlashMode.ON);
+        imgCap.setFlashMode(FlashMode.OFF);
 
         sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
@@ -468,8 +468,8 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("DETECT RESP bajangle", response.get(0).toString());
                     JSONObject obj = response.getJSONObject(0);
 
-                    // currentFaceId = obj.getString("faceId");
-                    // identify(obj.getString("faceId"));
+                    currentFaceId = obj.getString("faceId");
+                    identify(currentFaceId);
 
                 } catch (Exception exception) {
                     Log.d(TAG, "JSON EXCEPTION for request");
@@ -513,13 +513,11 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.d(TAG, "OOPS - creating body of request");
         }
-
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, ApiURL, jsonBody, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
+        CustomJsonRequest jsonObjectRequest = new CustomJsonRequest(Request.Method.POST, ApiURL, jsonBody, new Response.Listener<JSONArray>() {
+            public void onResponse(JSONArray response) {
                 try {
-                    Log.d("ID RESP bajangle", response.toString());
-                    currentFaceId = response.getString("faceId");
+                    Log.d("bajangle", response.toString());
+                    currentFaceId = response.toString();
                 } catch (Exception exception) {
                     Log.d(TAG, "JSON EXCEPTION for request");
                 }
