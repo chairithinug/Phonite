@@ -44,6 +44,7 @@ import com.microsoft.projectoxford.face.contract.PersonGroup;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
@@ -90,17 +91,33 @@ public class MainActivity extends AppCompatActivity {
     private Bitmap mBitmap;
     private String currentFaceId;
 
-    private void imgurAPI(ImageProxy image){
+    // IMGUR
+    private String authorization = "Client-ID 546c25a59c58ad7";
+    private String accessToken = "77ba3d75255e7e41a2c7898c6d03fb4028383a7e";
+
+    // Azure
+    private String AzureSubscriptionKey = "f6e89adaa6c34d22b3db1a42ae7278d9";
+
+    private ArrayList<String> hashDelete = new ArrayList<>();
+
+    private void imgurAPI(ImageProxy image) {
         String ApiURL = "https://api.imgur.com/3/upload";
         //  Map<String, String> params = new HashMap<>();
         //params.put("url", url);
 
-        CustomJsonRequest jsonObjectRequest = new CustomJsonRequest(Request.Method.POST, ApiURL, new JSONObject(), new Response.Listener<JSONObject>() {
+        String TAG = "IMGUR";
 
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, ApiURL, new JSONObject(), new Response.Listener<JSONObject>() {
             public void onResponse(JSONObject response) {
                 try {
-                    Log.d("bajangle", response.toString());
-                    currentFaceId = response.toString();
+                    Log.d(TAG, response.toString());
+                    JSONObject nested = (JSONObject) response.get("data");
+                    hashDelete.add(nested.get("deletehash").toString()); // Add to "to be deleted list" after finish
+                    Log.d(TAG, hashDelete.toString());
+                    String[] arr = nested.get("link").toString().split("/");
+                    String ending = arr[arr.length - 1];
+                    String url = "https://i.imgur.com/" + ending;
+                    currentFaceId = detect(url);
                 } catch (Exception exception) {
                     Log.d(TAG, "JSON EXCEPTION for request");
                 }
@@ -108,31 +125,24 @@ public class MainActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-             //   Log.d(TAG, "onErrorResponse: " + error.toString());
-                try{
-
-                    int frontIndex = error.getMessage().indexOf("link");
-                    int backIndex = error.getMessage().indexOf("success");
-                    //Log.d("bajangle", "lksjdflskdjf" + error.getMessage().substring(frontIndex + 5, backIndex));
-                    String link = error.getMessage().substring(frontIndex + 7, backIndex - 4);
-                    Log.d("bajangle", link);
+                Log.d(TAG, "onErrorResponse: " + error.toString());
+                try {
+//                    int frontIndex = error.getMessage().indexOf("link");
+//                    int backIndex = error.getMessage().indexOf("success");
+//                    String link = error.getMessage().substring(frontIndex + 7, backIndex - 4);
+//                    Log.d(TAG, link);
                     //Call Detect here with the link
                     try {
-                        String[] arr = link.split("/");
-//                        for(int i = 0; i < arr.length; i++)
-//                        {
-//                            Log.d("elem in arr", arr[i]);
-//                        }
-                        String ending = arr[arr.length-1];
-                        String url = "https://i.imgur.com/" + ending;
-                        currentFaceId = detect(url);
+//                        String[] arr = link.split("/");
+//                        String ending = arr[arr.length - 1];
+//                        String url = "https://i.imgur.com/" + ending;
+//                        currentFaceId = detect(url);
                     } catch (Exception e) {
                     }
 
-                }catch(Exception e){
+                } catch (Exception e) {
 
                 }
-
             }
         }) {
             /**
@@ -141,7 +151,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String, String> headers = new HashMap<String, String>();
-                headers.put("Authorization", "Client-ID c8611788cf08f60");
+//                headers.put("Authorization", authorization);
+                headers.put("Authorization", "Bearer " + accessToken);
                 return headers;
             }
 
@@ -150,19 +161,19 @@ public class MainActivity extends AppCompatActivity {
                 ByteBuffer bb;
                 try {
                     bb = image.getPlanes()[0].getBuffer();
-                } catch(Exception e) {
+                } catch (Exception e) {
                     return null;
                 }
                 byte[] buf = new byte[bb.remaining()];
                 bb.get(buf);
 
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
-         //       yuvImage.compressToJpeg(new Rect(49, 7, 273, 231), 74, out);
-                byte[] imageBytes =  out.toByteArray();
-                try{
+                //       yuvImage.compressToJpeg(new Rect(49, 7, 273, 231), 74, out);
+                byte[] imageBytes = out.toByteArray();
+                try {
                     image.close();
-                } catch (Exception e){
-                    Log.d("bad", "failed to close image");
+                } catch (Exception e) {
+                    Log.d(TAG, "failed to close image");
                 }
                 return buf;
 //                return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
@@ -208,7 +219,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "Detect click");
                 try {
                     currentFaceId = detect("https://i.imgur.com/SFjMNiW.jpg");
-                    //currentFaceId = detect("https://scontent-ort2-2.xx.fbcdn.net/v/t1.0-9/55575596_2441911285820226_8003582422639706112_o.jpg?_nc_cat=109&_nc_ohc=-1JvrcEswLMAQkKw8PkfKu6CfVc5skrJIi2f97juSiNEYXMH3Rm4gh7fA&_nc_ht=scontent-ort2-2.xx&oh=20cbb6046643d8ab795f622da77e6641&oe=5E8276BB");
                 } catch (Exception e) {
                 }
 
@@ -216,10 +226,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-
         viewFinder = findViewById(R.id.view_finder);
 
-        while(!allPermissionsGranted()) {
+        while (!allPermissionsGranted()) {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
         }
         imgCap = OurCamera.startCamera(this, viewFinder, runMeOnHit); //start camera if permission has been granted by user
@@ -235,24 +244,19 @@ public class MainActivity extends AppCompatActivity {
         sensorManager.registerListener(lightListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
 
 
-
         btnFire.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Executor ex = new Executor(){
+                Executor ex = new Executor() {
                     @Override
-                    public void execute(Runnable runnable){
+                    public void execute(Runnable runnable) {
                         runnable.run();
                     }
                 };
                 imgCap.takePicture(ex, new ImageCapture.OnImageCapturedListener() {
                     @Override
                     public void onCaptureSuccess(ImageProxy image, int rotationDegrees) {
-
-                        //Start Imgur API
-                        imgurAPI(image);
-
-
+                        imgurAPI(image); //Start Imgur API
                     }
                 });
                 /*
@@ -320,7 +324,7 @@ public class MainActivity extends AppCompatActivity {
         // 10 number comes from here https://codelabs.developers.google.com/codelabs/camerax-getting-started/#4
         if (requestCode == 10) {
             if (allPermissionsGranted()) {
-                 OurCamera.startCamera(this, viewFinder, runMeOnHit);
+                OurCamera.startCamera(this, viewFinder, runMeOnHit);
                 Log.d(TAG, "WE GET PERMISSIONS GRANTED");
             } else {
                 Toast.makeText(this,
@@ -414,34 +418,6 @@ public class MainActivity extends AppCompatActivity {
         return appContext;
     }
 
-    private void getRatios() {
-        String ApiURL = "https://kappa.bucky-mobile.com/ratio";
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (Request.Method.GET, ApiURL, null, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            JSONArray resp = (JSONArray) response.get("instances");
-                            for (int i = 0; i < resp.length(); i++) {
-                                JSONObject instance = (JSONObject) resp.get(i);
-                                String usernames = (String) instance.get("usernames");
-                                String ratios = (String) instance.get("ratios");
-                                Log.d(TAG, usernames + " " + ratios);
-                            }
-                        } catch (JSONException exception) {
-                            Log.d(TAG, "JSON EXCEPTION for request");
-                        }
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d(TAG, "onErrorResponse: " + error.toString());
-                    }
-                });
-        queue = Volley.newRequestQueue(MainActivity.getAppContext());
-        queue.add(jsonObjectRequest);
-    }
-
     /* Face Recognition Stuff */
 
     // PersonGroup id: phonite_gang
@@ -459,18 +435,20 @@ public class MainActivity extends AppCompatActivity {
         Map<String, String> params = new HashMap<>();
         params.put("url", url);
 
-        Log.d("URL: " ,url);
+        Log.d("URL: ", url);
+
+        String TAG = "Azure";
 
         CustomJsonRequest jsonObjectRequest = new CustomJsonRequest(Request.Method.POST, ApiURL, new JSONObject(params), new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
+//                Log.d(TAG, response.toString());
                 try {
-                    Log.d("DETECT RESP bajangle", response.get(0).toString());
+                    Log.d(TAG, response.get(0).toString());
                     JSONObject obj = response.getJSONObject(0);
 
                     currentFaceId = obj.getString("faceId");
                     identify(currentFaceId);
-
                 } catch (Exception exception) {
                     Log.d(TAG, "JSON EXCEPTION for request");
                 }
@@ -478,7 +456,7 @@ public class MainActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d("BAJANGLE", error.toString());
+                Log.d(TAG, error.toString());
             }
         }) {
             /**
@@ -487,7 +465,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String, String> headers = new HashMap<String, String>();
-                headers.put("Ocp-Apim-Subscription-Key", "f6e89adaa6c34d22b3db1a42ae7278d9");
+                headers.put("Ocp-Apim-Subscription-Key", AzureSubscriptionKey);
                 return headers;
             }
 
@@ -516,7 +494,7 @@ public class MainActivity extends AppCompatActivity {
         CustomJsonRequest jsonObjectRequest = new CustomJsonRequest(Request.Method.POST, ApiURL, jsonBody, new Response.Listener<JSONArray>() {
             public void onResponse(JSONArray response) {
                 try {
-                    Log.d("bajangle", response.toString());
+                    Log.d(TAG, response.toString());
                     currentFaceId = response.toString();
                 } catch (Exception exception) {
                     Log.d(TAG, "JSON EXCEPTION for request");
@@ -538,10 +516,8 @@ public class MainActivity extends AppCompatActivity {
                 headers.put("Content-Type", "application/json");
                 return headers;
             }
-
         };
         queue = Volley.newRequestQueue(MainActivity.getAppContext());
         queue.add(jsonObjectRequest);
     }
-
 }
