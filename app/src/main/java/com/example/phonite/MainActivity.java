@@ -221,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
         scanRunnable = new ScanRunnable();
         runMeOnHit = new RunMeOnHit();
         appContext = getApplicationContext();
-        btnFire.setText("Scan");
+        //btnFire.setText("Scan");
         crossHair = (ImageView) findViewById(R.id.crosshair);
         crossHair.setVisibility(View.INVISIBLE);
         editUsername = findViewById(R.id.editUsername);
