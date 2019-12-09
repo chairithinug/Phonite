@@ -221,9 +221,11 @@ public class MainActivity extends AppCompatActivity {
 //                    currentFaceId = detect("https://i.imgur.com/SFjMNiW.jpg");
 //                } catch (Exception e) {
 //                }
-
-                KappaServerRequest ksr = new KappaServerRequest(editUsername.getText().toString());
-                ksr.createPlayer();
+                if (!KappaServerRequest.created) {
+                    KappaServerRequest ksr = new KappaServerRequest(editUsername.getText().toString());
+                    ksr.createPlayer();
+                    editUsername.setEnabled(false);
+                }
             }
         });
 

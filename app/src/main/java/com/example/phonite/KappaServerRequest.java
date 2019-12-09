@@ -27,9 +27,12 @@ public class KappaServerRequest {
     public String myUsername;
     private final int startingHealth = 1000;
 
+    public static boolean created = false;
+
     // TODO
     public KappaServerRequest(String myUsername) {
         this.myUsername = myUsername;
+        created = true;
     }
 
     public void createPlayer() {
