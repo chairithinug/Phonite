@@ -410,6 +410,7 @@ public class MainActivity extends AppCompatActivity {
            // OurCamera.buttonConnector.setAnalyzeFlag(NOT_SCANNING);
             //OurCamera.startTorch(); // stops torch
             missSound.playSound();
+
         }
     }
 
@@ -422,6 +423,7 @@ public class MainActivity extends AppCompatActivity {
             // OurCamera.buttonConnector.setAnalyzeFlag(NOT_SCANNING);
             //OurCamera.startTorch(); // stops torch
             hitSound.playSound();
+
         }
     }
 
@@ -439,7 +441,6 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             // IF YOU COMMENT ME IN THE SOUND WILL FLIP FLOP IN BETWEEN THE TWO
 //            hitSound.playSound();
-            bloodSplatter(blood_img);
         }
     }
 
@@ -474,6 +475,8 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject obj = response.getJSONObject(0);
 
                     currentFaceId = obj.getString("faceId");
+                    bloodSplatter(blood_img);
+
                     try{
                         new Thread(hitSoundRunnable).start();
                     } catch(Exception e){
