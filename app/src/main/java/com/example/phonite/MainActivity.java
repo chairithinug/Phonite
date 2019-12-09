@@ -73,7 +73,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView hit;
     private SensorManager sensorManager;
     private Sensor sensor;
-    private FireRunnable fireRunnable;
+    private FireSoundRunnable fireSoundRunnable;
+    private HitSoundRunnable hitSoundRunnable;
     private ScanRunnable scanRunnable;
     private MarkMedia hitSound;
     private MarkMedia missSound;
@@ -122,6 +123,10 @@ public class MainActivity extends AppCompatActivity {
                     String ending = arr[arr.length - 1];
                     String url = "https://i.imgur.com/" + ending;
                     currentFaceId = detect(url);
+                    if(currentFaceId == null){
+
+                    }
+                    Log.d("fffff", "current Face ID: " + currentFaceId);
                 } catch (Exception exception) {
                     Log.d(TAG, "JSON EXCEPTION for request");
                 }
@@ -200,7 +205,8 @@ public class MainActivity extends AppCompatActivity {
         missSound.setSound(R.raw.laser);
         blood_img = (ImageView) findViewById(R.id.blood);
         btnFire = (Button) findViewById(R.id.btnFire);
-        fireRunnable = new FireRunnable();
+        fireSoundRunnable = new FireSoundRunnable();
+        hitSoundRunnable = new HitSoundRunnable();
         scanRunnable = new ScanRunnable();
         runMeOnHit = new RunMeOnHit();
         appContext = getApplicationContext();
@@ -253,8 +259,15 @@ public class MainActivity extends AppCompatActivity {
 
 
         btnFire.setOnClickListener(new View.OnClickListener() {
+
+
             @Override
             public void onClick(View v) {
+                try{
+                    new Thread(fireSoundRunnable).start();
+                } catch(Exception e){
+
+                }
                 Executor ex = new Executor() {
                     @Override
                     public void execute(Runnable runnable) {
@@ -369,15 +382,29 @@ public class MainActivity extends AppCompatActivity {
     };
 
 
-    public class FireRunnable implements Runnable {
+    public class FireSoundRunnable implements Runnable {
         @Override
         public void run() {
             Log.d("HITS", "Inside FireRunnable");
             //OurCamera.startTorch(); // start torch
-            final boolean NOT_SCANNING = false;
-            OurCamera.buttonConnector.setAnalyzeFlag(NOT_SCANNING);
+            //final boolean NOT_SCANNING = false;
+           // OurCamera.buttonConnector.setAnalyzeFlag(NOT_SCANNING);
             //OurCamera.startTorch(); // stops torch
             missSound.playSound();
+
+        }
+    }
+
+    public class HitSoundRunnable implements Runnable {
+        @Override
+        public void run() {
+            Log.d("HITS", "Inside FireRunnable");
+            //OurCamera.startTorch(); // start torch
+            //final boolean NOT_SCANNING = false;
+            // OurCamera.buttonConnector.setAnalyzeFlag(NOT_SCANNING);
+            //OurCamera.startTorch(); // stops torch
+            hitSound.playSound();
+
         }
     }
 
@@ -395,7 +422,6 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             // IF YOU COMMENT ME IN THE SOUND WILL FLIP FLOP IN BETWEEN THE TWO
 //            hitSound.playSound();
-            bloodSplatter(blood_img);
         }
     }
 
@@ -430,6 +456,14 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject obj = response.getJSONObject(0);
 
                     currentFaceId = obj.getString("faceId");
+                    bloodSplatter(blood_img);
+
+                    try{
+                        new Thread(hitSoundRunnable).start();
+                    } catch(Exception e){
+
+                    }
+
                     identify(currentFaceId);
                 } catch (Exception exception) {
                     Log.d(TAG, "JSON EXCEPTION for request");
@@ -439,6 +473,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.d(TAG, error.toString());
+
             }
         }) {
             /**
