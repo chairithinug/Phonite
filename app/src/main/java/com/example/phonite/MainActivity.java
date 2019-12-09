@@ -54,8 +54,6 @@ import java.util.concurrent.Executor;
 
 import org.json.JSONArray;
 
-import io.opencensus.metrics.LongGauge;
-
 public class MainActivity extends AppCompatActivity {
 
     public final String TAG = "MainActivity";
@@ -123,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
                     String ending = arr[arr.length - 1];
                     String url = "https://i.imgur.com/" + ending;
                     currentFaceId = detect(url);
-                    if(currentFaceId == null){
+                    if (currentFaceId == null) {
 
                     }
                     Log.d("fffff", "current Face ID: " + currentFaceId);
@@ -135,23 +133,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.d(TAG, "onErrorResponse: " + error.toString());
-                try {
-//                    int frontIndex = error.getMessage().indexOf("link");
-//                    int backIndex = error.getMessage().indexOf("success");
-//                    String link = error.getMessage().substring(frontIndex + 7, backIndex - 4);
-//                    Log.d(TAG, link);
-                    //Call Detect here with the link
-                    try {
-//                        String[] arr = link.split("/");
-//                        String ending = arr[arr.length - 1];
-//                        String url = "https://i.imgur.com/" + ending;
-//                        currentFaceId = detect(url);
-                    } catch (Exception e) {
-                    }
-
-                } catch (Exception e) {
-
-                }
             }
         }) {
             /**
@@ -195,10 +176,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     Handler timerCaller;
-    class TIMETAKER implements Runnable{
+
+    class TimeTaker implements Runnable {
 
         @Override
         public void run() {
+//            btnFire.setEnabled(true);
             ksr.getTimeLeft();
             timerCaller.postDelayed(this, 1000);
         }
@@ -234,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
         //await faceClient.PersonGroup.CreateAsync(personGroupId, "My Person Group Name", recognitionModel: "recognition_02");
 
         ksr = new KappaServerRequest();
+        ksr.clear();
         // Button that test the face detection and recognition
         createPlayer = (Button) findViewById(R.id.createButton);
         createPlayer.setOnClickListener(new View.OnClickListener() {
@@ -242,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
                 addingUsers = false;
                 ksr.startTimer(60);
                 createPlayer.setVisibility(View.INVISIBLE);
-                timerCaller.postDelayed(new TIMETAKER(), 1000);
+                timerCaller.postDelayed(new TimeTaker(), 1000);
 //                if (!KappaServerRequest.created) {
 //                    ksr = new KappaServerRequest(editUsername.getText().toString());
 //                    ksr.createPlayer();
@@ -271,13 +255,17 @@ public class MainActivity extends AppCompatActivity {
 
 
         btnFire.setOnClickListener(new View.OnClickListener() {
-
-
             @Override
             public void onClick(View v) {
-                try{
+//                if(MainActivity.addingUsers || ksr.timeLeft - MainActivity.lastTimeFired < 5){
+////                    btnFire.setEnabled(false);
+//                    return;
+//                } else {
+//                    MainActivity.lastTimeFired  = ksr.timeLeft;
+//                }
+                try {
                     new Thread(fireSoundRunnable).start();
-                } catch(Exception e){
+                } catch (Exception e) {
 
                 }
                 Executor ex = new Executor() {
@@ -300,6 +288,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+
+    public static int lastTimeFired = Integer.MAX_VALUE;
 
     private void bloodSplatter(ImageView blood_img) {
         blood_img.setVisibility(View.VISIBLE);
@@ -400,7 +390,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d("HITS", "Inside FireRunnable");
             //OurCamera.startTorch(); // start torch
             //final boolean NOT_SCANNING = false;
-           // OurCamera.buttonConnector.setAnalyzeFlag(NOT_SCANNING);
+            // OurCamera.buttonConnector.setAnalyzeFlag(NOT_SCANNING);
             //OurCamera.startTorch(); // stops torch
             missSound.playSound();
 
@@ -470,9 +460,9 @@ public class MainActivity extends AppCompatActivity {
                     currentFaceId = obj.getString("faceId");
                     bloodSplatter(blood_img);
 
-                    try{
+                    try {
                         new Thread(hitSoundRunnable).start();
-                    } catch(Exception e){
+                    } catch (Exception e) {
 
                     }
 
@@ -505,7 +495,7 @@ public class MainActivity extends AppCompatActivity {
         return currentFaceId;
     }
 
-    private boolean addingUsers;
+    public static boolean addingUsers;
 
     private void identify(String id) {
         String ApiURL = "https://centralus.api.cognitive.microsoft.com/face/v1.0/identify";
@@ -526,10 +516,10 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(JSONArray response) {
                 try {
                     Log.d(TAG, response.toString());
-                    currentFaceId = ((JSONObject)((JSONArray)((JSONObject) response.get(0)).get("candidates")).get(0)).get("personId").toString();
+                    currentFaceId = ((JSONObject) ((JSONArray) ((JSONObject) response.get(0)).get("candidates")).get(0)).get("personId").toString();
                     Log.d("AAA", currentFaceId);
-                    if(addingUsers){
-                        Log.d("AAA",  editUsername.getText().toString());
+                    if (addingUsers) {
+                        Log.d("AAA", editUsername.getText().toString());
                         ksr.createPlayer(100, editUsername.getText().toString(), currentFaceId);
                     } else {
                         Log.d("WE", "SHOULD NOT BE HERE YET");
