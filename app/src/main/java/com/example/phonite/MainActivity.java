@@ -216,12 +216,14 @@ public class MainActivity extends AppCompatActivity {
         btnDetect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "Detect click");
-                try {
-                    currentFaceId = detect("https://i.imgur.com/SFjMNiW.jpg");
-                } catch (Exception e) {
-                }
+//                Log.d(TAG, "Detect click");
+//                try {
+//                    currentFaceId = detect("https://i.imgur.com/SFjMNiW.jpg");
+//                } catch (Exception e) {
+//                }
 
+                KappaServerRequest ksr = new KappaServerRequest(editUsername.getText().toString());
+                ksr.createPlayer();
             }
         });
 
@@ -434,11 +436,8 @@ public class MainActivity extends AppCompatActivity {
         String ApiURL = "https://centralus.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&recognitionModel=recognition_02&returnRecognitionModel=false&detectionModel=detection_02";
         Map<String, String> params = new HashMap<>();
         params.put("url", url);
-
         Log.d("URL: ", url);
-
         String TAG = "Azure";
-
         CustomJsonRequest jsonObjectRequest = new CustomJsonRequest(Request.Method.POST, ApiURL, new JSONObject(params), new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
