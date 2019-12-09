@@ -42,7 +42,6 @@ import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.microsoft.projectoxford.face.FaceServiceRestClient;
 import com.microsoft.projectoxford.face.contract.PersonGroup;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -54,11 +53,13 @@ import java.util.concurrent.Executor;
 
 import org.json.JSONArray;
 
+import io.opencensus.metrics.LongGauge;
+
 public class MainActivity extends AppCompatActivity {
 
     public final String TAG = "MainActivity";
     public Button btnFire;
-    public Button btnDetect;
+    public Button btnStart;
     public TextureView viewFinder;
     private MediaPlayer mp = null;
     private String hello = "Hello!";
@@ -86,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageCapture imgCap;
     private EditText editUsername;
     private RequestQueue queue;
+    private Button createPlayer;
 
     // The image selected to detect.
     private Bitmap mBitmap;
@@ -99,6 +101,8 @@ public class MainActivity extends AppCompatActivity {
     private String AzureSubscriptionKey = "f6e89adaa6c34d22b3db1a42ae7278d9";
 
     private ArrayList<String> hashDelete = new ArrayList<>();
+
+    private KappaServerRequest ksr;
 
     private void imgurAPI(ImageProxy image) {
         String ApiURL = "https://api.imgur.com/3/upload";
@@ -187,6 +191,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        addingUsers = true;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         hitSound = new MarkMedia(getApplicationContext());
@@ -211,21 +216,20 @@ public class MainActivity extends AppCompatActivity {
         players.name = "players";
         //await faceClient.PersonGroup.CreateAsync(personGroupId, "My Person Group Name", recognitionModel: "recognition_02");
 
+        ksr = new KappaServerRequest();
         // Button that test the face detection and recognition
-        btnDetect = (Button) findViewById(R.id.detectButton);
-        btnDetect.setOnClickListener(new View.OnClickListener() {
+        createPlayer = (Button) findViewById(R.id.createButton);
+        createPlayer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Log.d(TAG, "Detect click");
-//                try {
-//                    currentFaceId = detect("https://i.imgur.com/SFjMNiW.jpg");
-//                } catch (Exception e) {
+                addingUsers = false;
+                ksr.startTimer(60);
+                createPlayer.setVisibility(View.INVISIBLE);
+//                if (!KappaServerRequest.created) {
+//                    ksr = new KappaServerRequest(editUsername.getText().toString());
+//                    ksr.createPlayer();
+//                    editUsername.setEnabled(false);
 //                }
-                if (!KappaServerRequest.created) {
-                    KappaServerRequest ksr = new KappaServerRequest(editUsername.getText().toString());
-                    ksr.createPlayer();
-                    editUsername.setEnabled(false);
-                }
             }
         });
 
@@ -263,33 +267,10 @@ public class MainActivity extends AppCompatActivity {
                         imgurAPI(image); //Start Imgur API
                     }
                 });
-                /*
-                if (scanCount >= 5) {
 
-                    Log.d(TAG, "Camera click");
-                    try {
-                        new Thread(fireRunnable).start();
-                    } catch (Exception e) {
-                    }
-                    btnFire.cancelPendingInputEvents();
-                } else {
-                    ImageAnalyzer.setUsername(editUsername.getText().toString());
-                    try {
-                        new Thread(scanRunnable).start();
-                    } catch (Exception e) {
-                    }
-                    scanCount++;
-                    if (scanCount == 3) {
-                        //Transition to ready up stage
-                        btnFire.setText("Everybody Ready?");
-                    } else if (scanCount == 4) {
-                        //Get other players here
-                        getRatios();
-                        crossHair.setVisibility(View.VISIBLE);
-                        btnFire.setText("FIRE");
-                    }
-                }
-                  */
+//                    ksr.reduceHealth(100, "SillyHead");
+
+
             }
         });
 
@@ -477,6 +458,8 @@ public class MainActivity extends AppCompatActivity {
         return currentFaceId;
     }
 
+    private boolean addingUsers;
+
     private void identify(String id) {
         String ApiURL = "https://centralus.api.cognitive.microsoft.com/face/v1.0/identify";
         JSONObject jsonBody = new JSONObject();
@@ -496,8 +479,17 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(JSONArray response) {
                 try {
                     Log.d(TAG, response.toString());
-                    currentFaceId = response.toString();
-                } catch (Exception exception) {
+                    currentFaceId = ((JSONObject)((JSONArray)((JSONObject) response.get(0)).get("candidates")).get(0)).get("personId").toString();
+                    Log.d("AAA", currentFaceId);
+                    if(addingUsers){
+                        Log.d("AAA",  editUsername.getText().toString());
+                        ksr.createPlayer(100, editUsername.getText().toString(), currentFaceId);
+                    } else {
+                        Log.d("WE", "SHOULD NOT BE HERE YET");
+                        ksr.reduceHealth(100, currentFaceId);
+                    }
+                } catch (Exception e) {
+                    Log.d(TAG, e.getStackTrace().toString());
                     Log.d(TAG, "JSON EXCEPTION for request");
                 }
             }
@@ -513,7 +505,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String, String> headers = new HashMap<String, String>();
-                headers.put("Ocp-Apim-Subscription-Key", "f6e89adaa6c34d22b3db1a42ae7278d9");
+                headers.put("Ocp-Apim-Subscription-Key", AzureSubscriptionKey);
                 headers.put("Content-Type", "application/json");
                 return headers;
             }

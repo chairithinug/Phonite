@@ -36,6 +36,8 @@ public class OurCamera implements Runnable {
         preview.enableTorch(!preview.isTorchOn());
     }
 
+
+
     public static ImageCapture startCamera(LifecycleOwner lifecycleOwner, TextureView viewFinder, Runnable runThisOnHit) {
         cameraStarted = true;
 
@@ -61,7 +63,6 @@ public class OurCamera implements Runnable {
         ImageCaptureConfig config = new ImageCaptureConfig.Builder().build();
 
         ImageCapture imageCapture = new ImageCapture(config);
-
 
         CameraX.bindToLifecycle(lifecycleOwner, imageCapture, preview); //, preview, imageCapture)
 

@@ -24,21 +24,19 @@ public class KappaServerRequest {
     // Game mechanism
     public int timeLeft = -1;
     public JSONArray usersHealth;
-    public String myUsername;
-    private final int startingHealth = 1000;
 
     public static boolean created = false;
 
     // TODO
-    public KappaServerRequest(String myUsername) {
-        this.myUsername = myUsername;
+    public KappaServerRequest () {
         created = true;
     }
 
-    public void createPlayer() {
+    public void createPlayer(int health, String username, String faceId) {
         HashMap<Object, Object> request = new HashMap<>();
-        request.put("usernames", myUsername);
-        request.put("health", startingHealth);
+        request.put("usernames", username);
+        request.put("faceid", faceId);
+        request.put("health", health);
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
                 (Request.Method.POST, baseURL + "health", new JSONObject(request), new Response.Listener<JSONObject>() {
@@ -101,9 +99,9 @@ public class KappaServerRequest {
         queue.add(jsonObjectRequest);
     }
 
-    public void reduceHealth(int healthToReduce, String usernameShot){
+    public void reduceHealth(int healthToReduce, String faceId){
         HashMap<Object, Object> request = new HashMap<>();
-        request.put("usernames", usernameShot);
+        request.put("faceid", faceId);
         request.put("health", healthToReduce);
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
@@ -112,7 +110,10 @@ public class KappaServerRequest {
                     public void onResponse(JSONObject response) {
                         try {
                             int healthLeft = (int) response.get("health");
-                            Log.d(TAG, usernameShot + " " + healthLeft);
+                            Log.d(TAG, faceId + " " + healthLeft);
+                            if (healthLeft <= 0) {
+                                Log.d(TAG, faceId + " is dead");
+                            }
                         } catch (JSONException e){
                             Log.d(TAG, e.getStackTrace().toString());
                         }
