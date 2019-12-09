@@ -185,7 +185,7 @@ public class KappaServerRequest {
                     public void onResponse(JSONObject response) {
                         Log.d(TAG, response.toString());
                         try {
-                            timeLeft = (int) response.get("time");
+                            MainActivity.timeLeft = (int) response.get("time");
                             Log.d(TAG, "timeLeft: " + timeLeft);
                         } catch (JSONException e) {
                             Log.d(TAG, e.getStackTrace().toString());

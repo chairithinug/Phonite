@@ -11,6 +11,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
@@ -59,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
 
     public final String TAG = "MainActivity";
     public Button btnFire;
-    public Button btnStart;
     public TextureView viewFinder;
     private MediaPlayer mp = null;
     private String hello = "Hello!";
@@ -194,10 +194,21 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    Handler timerCaller;
+    class TIMETAKER implements Runnable{
+
+        @Override
+        public void run() {
+            ksr.getTimeLeft();
+            timerCaller.postDelayed(this, 1000);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         addingUsers = true;
         super.onCreate(savedInstanceState);
+        timerCaller = new Handler();
         setContentView(R.layout.activity_main);
         hitSound = new MarkMedia(getApplicationContext());
         missSound = new MarkMedia(getApplicationContext());
@@ -231,6 +242,7 @@ public class MainActivity extends AppCompatActivity {
                 addingUsers = false;
                 ksr.startTimer(60);
                 createPlayer.setVisibility(View.INVISIBLE);
+                timerCaller.postDelayed(new TIMETAKER(), 1000);
 //                if (!KappaServerRequest.created) {
 //                    ksr = new KappaServerRequest(editUsername.getText().toString());
 //                    ksr.createPlayer();
