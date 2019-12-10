@@ -43,6 +43,7 @@ import com.microsoft.projectoxford.face.FaceServiceClient;
 import com.microsoft.projectoxford.face.FaceServiceRestClient;
 import com.microsoft.projectoxford.face.contract.PersonGroup;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -69,6 +70,8 @@ public class MainActivity extends AppCompatActivity {
     private String sx;
     private TextView textLight;
     private TextView hit;
+    private TextView timer;
+    private TextView playershealth;
     private SensorManager sensorManager;
     private Sensor sensor;
     private FireSoundRunnable fireSoundRunnable;
@@ -126,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     Log.d("fffff", "current Face ID: " + currentFaceId);
                 } catch (Exception exception) {
-                    Log.d(TAG, "JSON EXCEPTION for request");
+                    Log.d(TAG, "Imgur Upload Failed");
                 }
             }
         }, new Response.ErrorListener() {
@@ -179,11 +182,87 @@ public class MainActivity extends AppCompatActivity {
 
     class TimeTaker implements Runnable {
 
+        public boolean thisPlayerAlive = true;
+        public int userIdx = -1;
+
         @Override
         public void run() {
-//            btnFire.setEnabled(true);
             ksr.getTimeLeft();
+            if (thisPlayerAlive) {
+                timer.setText("" + ksr.timeLeft);
+                ksr.getHealth();
+                if (ksr.usersHealth != null) {
+                    Log.d(TAG, ksr.usersHealth.toString());
+                    String text= "";
+                    for (int i =  0; i < ksr.usersHealth.length();i++) {
+                        try{
+                            text += ((JSONObject) ksr.usersHealth.get(i)).get("usernames").toString() + "\t" + ((JSONObject) ksr.usersHealth.get(i)).get("health").toString() + "\n";
+                        } catch (JSONException e) {
+                            Log.d(TAG, "Error Concatenating health");
+                        }
+                    }
+                    playershealth.setText(text);
+                    // run only once to get this user index
+                    if (userIdx == -1) {
+                        for (int i = 0; i < ksr.usersHealth.length(); i++) {
+                            try {
+                                if (((JSONObject) ksr.usersHealth.get(i)).get("usernames").equals(editUsername.getText().toString())) {
+                                    userIdx = i;
+                                    break;
+                                }
+                            } catch (JSONException e) {
+                                Log.d(TAG, "Get health Error, Cant find username");
+                            }
+                        }
+                    } else {
+                        try {
+                            if ((int) ((JSONObject) ksr.usersHealth.get(userIdx)).get("health") <= 0) {
+                                btnFire.setEnabled(false);
+                                thisPlayerAlive = false;
+                            }
+                        } catch (JSONException e) {
+                            Log.d(TAG, "Get health Error");
+                        }
+                    }
+                }
+            } else {
+                timer.setText("You are dead! " + ksr.timeLeft);
+                btnFire.setVisibility(View.INVISIBLE);
+            }
             timerCaller.postDelayed(this, 1000);
+            // Stop requesting timer
+            if (ksr.timeLeft == 1) {
+                timerCaller.removeCallbacks(this);
+                btnFire.setVisibility(View.INVISIBLE);
+                timer.setText("00");
+                deletePicture();
+
+                // Print Health
+                //
+            }
+        }
+    }
+
+    Handler BtnLock;
+
+    class FireLock implements Runnable {
+
+        private boolean toggle = true;
+
+        @Override
+        public void run() {
+            if (toggle) {
+                Log.d("BTNLOCK", "lock");
+                btnFire.setVisibility(View.INVISIBLE);
+                toggle = false;
+                BtnLock.postDelayed(this, 5000);
+            } else {
+                Log.d("BTNLOCK", "stop");
+                BtnLock.removeCallbacks(this);
+                btnFire.setVisibility(View.VISIBLE);
+                toggle = true;
+            }
+
         }
     }
 
@@ -192,6 +271,7 @@ public class MainActivity extends AppCompatActivity {
         addingUsers = true;
         super.onCreate(savedInstanceState);
         timerCaller = new Handler();
+        BtnLock = new Handler();
         setContentView(R.layout.activity_main);
         hitSound = new MarkMedia(getApplicationContext());
         missSound = new MarkMedia(getApplicationContext());
@@ -199,8 +279,12 @@ public class MainActivity extends AppCompatActivity {
         missSound.setSound(R.raw.laser);
         blood_img = (ImageView) findViewById(R.id.blood);
         btnFire = (Button) findViewById(R.id.btnFire);
+        timer = findViewById(R.id.timer);
+        playershealth = findViewById(R.id.playershealth);
         fireSoundRunnable = new FireSoundRunnable();
         hitSoundRunnable = new HitSoundRunnable();
+        TimeTaker tt = new TimeTaker();
+        FireLock fl = new FireLock();
         scanRunnable = new ScanRunnable();
         runMeOnHit = new RunMeOnHit();
         appContext = getApplicationContext();
@@ -223,19 +307,14 @@ public class MainActivity extends AppCompatActivity {
         createPlayer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                int time = 60;
                 addingUsers = false;
-                ksr.startTimer(60);
+                editUsername.setEnabled(false);
+                ksr.startTimer(time);
                 createPlayer.setVisibility(View.INVISIBLE);
-                timerCaller.postDelayed(new TimeTaker(), 1000);
-//                if (!KappaServerRequest.created) {
-//                    ksr = new KappaServerRequest(editUsername.getText().toString());
-//                    ksr.createPlayer();
-//                    editUsername.setEnabled(false);
-//                }
+                timerCaller.postDelayed(tt, 1000);
             }
         });
-
-
         viewFinder = findViewById(R.id.view_finder);
 
         while (!allPermissionsGranted()) {
@@ -243,26 +322,18 @@ public class MainActivity extends AppCompatActivity {
         }
         imgCap = OurCamera.startCamera(this, viewFinder, runMeOnHit); //start camera if permission has been granted by user
         imgCap.setFlashMode(FlashMode.OFF);
-
         sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         textLight = findViewById(R.id.textLight);
         textLight.setTextColor(Color.WHITE);
         hit = findViewById(R.id.hit);
         hit.setText("");
-
         sensorManager.registerListener(lightListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
-
-
         btnFire.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                if(MainActivity.addingUsers || ksr.timeLeft - MainActivity.lastTimeFired < 5){
-////                    btnFire.setEnabled(false);
-//                    return;
-//                } else {
-//                    MainActivity.lastTimeFired  = ksr.timeLeft;
-//                }
+                if (!addingUsers)
+                    BtnLock.post(fl);
                 try {
                     new Thread(fireSoundRunnable).start();
                 } catch (Exception e) {
@@ -280,16 +351,12 @@ public class MainActivity extends AppCompatActivity {
                         imgurAPI(image); //Start Imgur API
                     }
                 });
-
-//                    ksr.reduceHealth(100, "SillyHead");
-
-
             }
         });
 
     }
 
-    public static int lastTimeFired = Integer.MAX_VALUE;
+    public static int lastTimeFired = Integer.MIN_VALUE;
 
     private void bloodSplatter(ImageView blood_img) {
         blood_img.setVisibility(View.VISIBLE);
@@ -314,6 +381,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onStop() {
+        deletePicture();
         super.onStop();
         sensorManager.unregisterListener(lightListener);
     }
@@ -522,7 +590,6 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("AAA", editUsername.getText().toString());
                         ksr.createPlayer(100, editUsername.getText().toString(), currentFaceId);
                     } else {
-                        Log.d("WE", "SHOULD NOT BE HERE YET");
                         ksr.reduceHealth(100, currentFaceId);
                     }
                 } catch (Exception e) {
@@ -549,5 +616,42 @@ public class MainActivity extends AppCompatActivity {
         };
         queue = Volley.newRequestQueue(MainActivity.getAppContext());
         queue.add(jsonObjectRequest);
+    }
+
+    private void deletePicture() {
+        String ApiURL = "https://api.imgur.com/3/image/"; // {{imageHash}}
+        String TAG = "IMGUR";
+
+        for (String s : hashDelete) {
+            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.DELETE, ApiURL + s, null, new Response.Listener<JSONObject>() {
+                public void onResponse(JSONObject response) {
+                    try {
+                        Log.d(TAG, response.toString());
+                        if ((boolean) response.get("success")) {
+                            Log.d(TAG, "OK");
+                            hashDelete.remove(s);
+                        } else {
+                            Log.d(TAG, "ERROR with " + s);
+                        }
+                    } catch (Exception exception) {
+                        Log.d(TAG, "Imgur Delete Failed");
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.d(TAG, "onErrorResponse: " + error.toString());
+                }
+            }) {
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    HashMap<String, String> headers = new HashMap<String, String>();
+                    headers.put("Authorization", "Bearer " + accessToken);
+                    return headers;
+                }
+            };
+            queue = Volley.newRequestQueue(MainActivity.getAppContext());
+            queue.add(jsonObjectRequest);
+        }
     }
 }

@@ -22,7 +22,7 @@ public class KappaServerRequest {
     private RequestQueue queue;
 
     // Game mechanism
-    public int timeLeft = -1;
+    public int timeLeft = 0;
     public JSONArray usersHealth;
 
     public static boolean created = false;
@@ -180,7 +180,7 @@ public class KappaServerRequest {
 
     public void getTimeLeft() {
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (Request.Method.GET, baseURL + "start_timer", null, new Response.Listener<JSONObject>() {
+                (Request.Method.GET, baseURL + "time_left", null, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         Log.d(TAG, response.toString());
