@@ -193,9 +193,9 @@ public class MainActivity extends AppCompatActivity {
                 ksr.getHealth();
                 if (ksr.usersHealth != null) {
                     Log.d(TAG, ksr.usersHealth.toString());
-                    String text= "";
-                    for (int i =  0; i < ksr.usersHealth.length();i++) {
-                        try{
+                    String text = "";
+                    for (int i = 0; i < ksr.usersHealth.length(); i++) {
+                        try {
                             text += ((JSONObject) ksr.usersHealth.get(i)).get("usernames").toString() + "\t" + ((JSONObject) ksr.usersHealth.get(i)).get("health").toString() + "\n";
                         } catch (JSONException e) {
                             Log.d(TAG, "Error Concatenating health");
@@ -203,26 +203,23 @@ public class MainActivity extends AppCompatActivity {
                     }
                     playershealth.setText(text);
                     // run only once to get this user index
-                    if (userIdx == -1) {
-                        for (int i = 0; i < ksr.usersHealth.length(); i++) {
-                            try {
-                                if (((JSONObject) ksr.usersHealth.get(i)).get("usernames").equals(editUsername.getText().toString())) {
-                                    userIdx = i;
-                                    break;
-                                }
-                            } catch (JSONException e) {
-                                Log.d(TAG, "Get health Error, Cant find username");
-                            }
-                        }
-                    } else {
+                    for (int i = 0; i < ksr.usersHealth.length(); i++) {
                         try {
-                            if ((int) ((JSONObject) ksr.usersHealth.get(userIdx)).get("health") <= 0) {
-                                btnFire.setEnabled(false);
-                                thisPlayerAlive = false;
+                            if (((JSONObject) ksr.usersHealth.get(i)).get("usernames").equals(editUsername.getText().toString())) {
+                                userIdx = i;
+                                break;
                             }
                         } catch (JSONException e) {
-                            Log.d(TAG, "Get health Error");
+                            Log.d(TAG, "Get health Error, Cant find username");
                         }
+                    }
+                    try {
+                        if ((int) ((JSONObject) ksr.usersHealth.get(userIdx)).get("health") <= 0) {
+                            btnFire.setEnabled(false);
+                            thisPlayerAlive = false;
+                        }
+                    } catch (JSONException e) {
+                        Log.d(TAG, "Get health Error");
                     }
                 }
             } else {
@@ -588,7 +585,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("AAA", currentFaceId);
                     if (addingUsers) {
                         Log.d("AAA", editUsername.getText().toString());
-                        ksr.createPlayer(100, editUsername.getText().toString(), currentFaceId);
+                        ksr.createPlayer(500, editUsername.getText().toString(), currentFaceId);
                     } else {
                         ksr.reduceHealth(100, currentFaceId);
                     }
