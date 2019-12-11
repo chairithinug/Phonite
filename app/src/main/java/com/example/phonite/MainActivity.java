@@ -304,7 +304,7 @@ public class MainActivity extends AppCompatActivity {
         createPlayer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int time = 60;
+                int time = 30;
                 addingUsers = false;
                 editUsername.setEnabled(false);
                 ksr.startTimer(time);
@@ -585,7 +585,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("AAA", currentFaceId);
                     if (addingUsers) {
                         Log.d("AAA", editUsername.getText().toString());
-                        ksr.createPlayer(500, editUsername.getText().toString(), currentFaceId);
+                        ksr.createPlayer(100, editUsername.getText().toString(), currentFaceId);
                     } else {
                         ksr.reduceHealth(100, currentFaceId);
                     }
